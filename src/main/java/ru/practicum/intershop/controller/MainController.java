@@ -5,8 +5,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.practicum.intershop.dto.ItemDto;
 import ru.practicum.intershop.model.Item;
+import ru.practicum.intershop.service.CartService;
+import ru.practicum.intershop.service.ItemDtoService;
 import ru.practicum.intershop.service.ItemService;
 
 import java.util.ArrayList;
@@ -18,7 +23,10 @@ import java.util.Map;
 public class MainController {
 
     @Autowired
-    private ItemService itemService;  // Сервис для работы с товарами
+    private ItemDtoService itemDtoService;
+
+    @Autowired
+    private CartService cartService;
 
     @GetMapping("/")
     public String redirectToItems() {
@@ -33,16 +41,14 @@ public class MainController {
             @RequestParam(defaultValue = "1") int pageNumber,  // номер текущей страницы
             Model model) {
 
-        List<Item> items = itemService.getAllItems();
-
-        System.out.println(items);
+        List<ItemDto> itemDtos = itemDtoService.getAllItemsWithCart();
 
         // Разбиение на строки по N товаров
-        List<List<Item>> itemsInRows = chunkItems(items, 3);  // 3 товара в ряду
+        List<List<ItemDto>> itemsInRows = chunkItems(itemDtos, 3);  // 3 товара в ряду
 
         Map<String, Object> pagingData = new HashMap<>();
         pagingData.put("pageNumber", 1);  // Номер текущей страницы (с 1)
-        pagingData.put("pageSize", items.size());  // Размер страницы
+        pagingData.put("pageSize", itemDtos.size());  // Размер страницы
         pagingData.put("hasNext", false);  // Есть ли следующая страница
         pagingData.put("hasPrevious", false);  // Есть ли предыдущая страница
 
@@ -55,12 +61,20 @@ public class MainController {
     }
 
     // Метод для разделения списка на строки по N элементов
-    private List<List<Item>> chunkItems(List<Item> items, int chunkSize) {
-        List<List<Item>> chunks = new ArrayList<>();
+    private List<List<ItemDto>> chunkItems(List<ItemDto> items, int chunkSize) {
+        List<List<ItemDto>> chunks = new ArrayList<>();
         for (int i = 0; i < items.size(); i += chunkSize) {
             chunks.add(items.subList(i, Math.min(i + chunkSize, items.size())));
         }
         return chunks;
+    }
+
+    @PostMapping("/main/items/{id}")
+    public String changeCountOfItem(@PathVariable("id") Long id,
+                                    @RequestParam("action") String action,
+                                    @RequestParam(value = "count") Integer count){
+        cartService.changeCountOfItem(id, action, count);
+        return "redirect:/main/items";
     }
 
 }

@@ -22,5 +22,6 @@ public class CartItem {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int quantity;
+    @Column(name = "quantity")
+    private int count;
 }

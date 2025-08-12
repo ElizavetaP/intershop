@@ -4,8 +4,7 @@ CREATE TABLE IF NOT EXISTS item (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     price INT NOT NULL,
-    img_path VARCHAR(255) NOT NULL,
-    count INT NOT NULL
+    img_path VARCHAR(255) NOT NULL
 );
 
 

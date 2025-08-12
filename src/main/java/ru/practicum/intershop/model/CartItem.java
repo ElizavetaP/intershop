@@ -3,7 +3,7 @@ package ru.practicum.intershop.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 
 @Entity
 @Getter
@@ -15,7 +15,7 @@ public class CartItem {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "orders_id")
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,5 +23,4 @@ public class CartItem {
     private Item item;
 
     private int quantity;
-    private double price;
 }

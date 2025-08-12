@@ -1,11 +1,8 @@
 package ru.practicum.intershop.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 @Entity
 @Getter
@@ -17,7 +14,7 @@ public class Item {
 
     private String title;
     private String description;
-    private double price;
+    private int price;
     private String imgPath;
     private int count;
 }

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "ru.practicum.intershop")
 public class IntershopApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(IntershopApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(IntershopApplication.class, args);
+    }
 
 }

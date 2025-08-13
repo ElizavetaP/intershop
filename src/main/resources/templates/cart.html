@@ -33,6 +33,7 @@
                 <tr>
                     <td>
                         <form th:action="${'/intershop/cart/items/'+cartItem.getId()}" method="post">
+                            <input type="hidden" name="count" th:value="${cartItem.getCount()}" />
                             <button name="action" value="minus">-</button>
                             <span th:text="${cartItem.getCount()}"></span>
                             <button name="action" value="plus">+</button>

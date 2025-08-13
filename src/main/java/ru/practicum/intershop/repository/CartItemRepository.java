@@ -13,13 +13,13 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE CartItem c SET c.count = c.count + 1 WHERE c.item.id = :itemId AND c.order IS NULL")
-    void incrementCountById(Long itemId);
+    @Query("UPDATE CartItem c SET c.count = c.count + 1 WHERE c.id = :id AND c.order IS NULL")
+    void incrementCountById(Long id);
 
     @Transactional
     @Modifying
-    @Query("UPDATE CartItem c SET c.count = c.count - 1 WHERE c.item.id = :itemId AND c.order IS NULL")
-    int decrementCountById(Long itemId);
+    @Query("UPDATE CartItem c SET c.count = c.count - 1 WHERE c.id = :id AND c.order IS NULL")
+    void decrementCountById(Long id);
 
     // Метод для получения одного CartItem по itemId, где order == null (заказ еще не создан)
     @Query("SELECT c FROM CartItem c WHERE c.item.id = :itemId AND c.order IS NULL")

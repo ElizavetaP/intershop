@@ -70,8 +70,8 @@ public class MainController {
     @PostMapping("/main/items/{id}")
     public String changeCountOfItem(@PathVariable("id") Long id,
                                     @RequestParam("action") String action,
-                                    @RequestParam(value = "count") Integer count){
-        cartService.changeCountOfItem(id, action, count);
+                                    @RequestParam(value = "count") Integer count) {
+        cartService.changeCountOfItemByItemId(id, action, count);
         return "redirect:/main/items";
     }
 

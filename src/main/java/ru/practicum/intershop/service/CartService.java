@@ -15,6 +15,7 @@ public class CartService {
 
     private static final String ACTION_INCREASE = "plus";
     private static final String ACTION_DECREASE = "minus";
+    private static final String ACTION_DELETE = "delete";
 
     @Autowired
     CartItemRepository cartItemRepository;
@@ -22,30 +23,42 @@ public class CartService {
     @Autowired
     ItemService itemService;
 
-    public List<CartItem> getAllNewCartItem(){
+    public List<CartItem> getAllNewCartItem() {
         return cartItemRepository.getAllNewCartItem();
     }
 
-    public Optional<CartItem> getNewCartItemByItemId(Long itemId){
-         return cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId);
+    public Optional<CartItem> getNewCartItemByItemId(Long itemId) {
+        return cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId);
     }
 
     @Transactional
-    public void changeCountOfItem(Long itemId, String action, int count){
-        if (action.equals(ACTION_INCREASE)) {
-            if (getNewCartItemByItemId(itemId).isEmpty()){
-                createCartItem(itemId);
+    public void performCartAction(Long cartItemId, String action, int currentCount) {
+        switch (action) {
+            case ACTION_INCREASE -> cartItemRepository.incrementCountById(cartItemId);
+            case ACTION_DECREASE -> {
+                if (currentCount <= 1) {
+                    cartItemRepository.deleteById(cartItemId);
+                } else {
+                    cartItemRepository.decrementCountById(cartItemId);
+                }
             }
-            cartItemRepository.incrementCountById(itemId);
-        } else if (action.equals(ACTION_DECREASE)){
-            if(count<=1){
-                deleteCartItem(getNewCartItemByItemId(itemId).get());
-            }
-            cartItemRepository.decrementCountById(itemId);
+            case ACTION_DELETE -> cartItemRepository.deleteById(cartItemId);
         }
     }
 
-    public void createCartItem(Long itemId){
+    @Transactional
+    public void changeCountOfItemByItemId(Long itemId, String action, int currentCount) {
+        Optional<CartItem> optionalCartItem = getNewCartItemByItemId(itemId);
+
+        if (action.equals(ACTION_INCREASE) && optionalCartItem.isEmpty()) {
+            //прежде чем увеличить count, создаем cartItem
+            createCartItem(itemId);
+            optionalCartItem = getNewCartItemByItemId(itemId);
+        }
+        performCartAction(optionalCartItem.get().getId(), action, currentCount);
+    }
+
+    public void createCartItem(Long itemId) {
         Item item = itemService.getItemById(itemId);
         CartItem cartItem = new CartItem();
         cartItem.setItem(item);
@@ -53,13 +66,13 @@ public class CartService {
         cartItemRepository.save(cartItem);
     }
 
-    public void deleteCartItem(CartItem cartItem){
+    public void deleteCartItem(CartItem cartItem) {
         cartItemRepository.delete(cartItem);
     }
 
-    public int getTotalPriceInCart(List<CartItem> cartItems){
+    public int getTotalPriceInCart(List<CartItem> cartItems) {
         return cartItems.stream()
-                .mapToInt(c -> c.getCount()*c.getItem().getPrice())
+                .mapToInt(c -> c.getCount() * c.getItem().getPrice())
                 .sum();
     }
 }

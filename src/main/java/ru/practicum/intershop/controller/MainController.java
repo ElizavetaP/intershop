@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.intershop.dto.ItemDto;
-import ru.practicum.intershop.model.Item;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
-import ru.practicum.intershop.service.ItemService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

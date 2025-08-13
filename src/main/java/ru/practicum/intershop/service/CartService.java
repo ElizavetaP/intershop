@@ -26,20 +26,20 @@ public class CartService {
         return cartItemRepository.getAllNewCartItem();
     }
 
-    public Optional<CartItem> getCartItemByItemId(Long itemId){
+    public Optional<CartItem> getNewCartItemByItemId(Long itemId){
          return cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId);
     }
 
     @Transactional
     public void changeCountOfItem(Long itemId, String action, int count){
         if (action.equals(ACTION_INCREASE)) {
-            if (getCartItemByItemId(itemId).isEmpty()){
+            if (getNewCartItemByItemId(itemId).isEmpty()){
                 createCartItem(itemId);
             }
             cartItemRepository.incrementCountById(itemId);
         } else if (action.equals(ACTION_DECREASE)){
             if(count<=1){
-                cartItemRepository.delete(cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId).get());
+                deleteCartItem(getNewCartItemByItemId(itemId).get());
             }
             cartItemRepository.decrementCountById(itemId);
         }
@@ -55,5 +55,11 @@ public class CartService {
 
     public void deleteCartItem(CartItem cartItem){
         cartItemRepository.delete(cartItem);
+    }
+
+    public int getTotalPriceInCart(List<CartItem> cartItems){
+        return cartItems.stream()
+                .mapToInt(c -> c.getCount()*c.getItem().getPrice())
+                .sum();
     }
 }

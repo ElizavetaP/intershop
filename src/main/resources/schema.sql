@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS cart_item (
     item_id BIGINT NOT NULL,                -- Идентификатор товара
     quantity INT NOT NULL,                  -- Количество товара в корзине
     orders_id BIGINT,                        -- Идентификатор заказа (связь с orders)
+    price INT NOT NULL,                    --Цена на момент покупки
     FOREIGN KEY (item_id) REFERENCES item(id) ON DELETE CASCADE,  -- Связь с таблицей item
     FOREIGN KEY (orders_id) REFERENCES orders(id) ON DELETE CASCADE  -- Связь с таблицей orders
 );

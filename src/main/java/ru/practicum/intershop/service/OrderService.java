@@ -25,4 +25,8 @@ public class OrderService {
         }
         return orderRepository.save(order);
     }
+
+    public List<Order> getOrders(){
+        return orderRepository.findAll();
+    }
 }

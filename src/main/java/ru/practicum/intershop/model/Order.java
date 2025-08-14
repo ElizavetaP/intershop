@@ -21,4 +21,10 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
+
+    public int getTotalSum() {
+        return cartItems.stream()
+                .mapToInt(cartItem -> cartItem.getPrice() * cartItem.getCount())
+                .sum();
+    }
 }

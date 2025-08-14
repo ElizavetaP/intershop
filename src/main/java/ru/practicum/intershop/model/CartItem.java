@@ -24,4 +24,8 @@ public class CartItem {
 
     @Column(name = "quantity")
     private int count;
+
+    @Column(name = "price", nullable = false)
+    private int price; // Цена на момент покупки
+
 }

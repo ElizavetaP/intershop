@@ -51,7 +51,7 @@ public class CartService {
         Optional<CartItem> optionalCartItem = getNewCartItemByItemId(itemId);
 
         if (action.equals(ACTION_INCREASE) && optionalCartItem.isEmpty()) {
-            //прежде чем увеличить count, создаем cartItem
+            //прежде чем увеличить count, создаем cartItem, если он отсутствует в корзине.
             createCartItem(itemId);
             optionalCartItem = getNewCartItemByItemId(itemId);
         }

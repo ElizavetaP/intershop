@@ -8,6 +8,8 @@ import ru.practicum.intershop.model.Item;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,17 +25,22 @@ public class ItemDtoService {
         List<Item> items = itemService.getAllItems();
         List<CartItem> cartItems = cartService.getAllNewCartItem();
 
-        return getItemDto(items, cartItems);
+        return getListItemDto(items, cartItems);
     }
 
-    public List<ItemDto> getItemDto(List<Item> items, List<CartItem> cartItems) {
-        Map<Long, Integer> cartItemMap = cartItems.stream()
-                .collect(Collectors.toMap(cartItem -> cartItem.getItem().getId(), CartItem::getCount));
+    public List<ItemDto> getListItemDto(List<Item> items, List<CartItem> cartItems) {
+        Map<Long, CartItem> cartItemMap = cartItems.stream()
+                .collect(Collectors.toMap(cartItem -> cartItem.getItem().getId(), Function.identity()));
 
         return items.stream()
-                .map(item -> new ItemDto(item, cartItemMap.getOrDefault(item.getId(), 0)))
+                .map(item -> new ItemDto(item, Optional.ofNullable(cartItemMap.get(item.getId()))))
                 .collect(Collectors.toList());
     }
 
+    public ItemDto getItemDto(Long itemId){
+        Item item = itemService.getItemById(itemId);
+        Optional<CartItem> optionalCartItem = cartService.getNewCartItemByItemId(itemId);
+        return new ItemDto(item, optionalCartItem);
+    }
 
 }

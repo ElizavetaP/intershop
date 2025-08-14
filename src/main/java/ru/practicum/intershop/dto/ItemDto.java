@@ -7,8 +7,7 @@ import lombok.Setter;
 import ru.practicum.intershop.model.CartItem;
 import ru.practicum.intershop.model.Item;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -36,9 +35,9 @@ public class ItemDto {
         this.count = 0;
     }
 
-    public ItemDto(Item item, int count) {
+    public ItemDto(Item item, Optional<CartItem> optionalCartItem) {
         this(item);
-        this.count = count;
+        this.count = optionalCartItem.map(CartItem::getCount).orElse(0);
     }
 
 }

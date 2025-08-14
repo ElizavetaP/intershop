@@ -19,7 +19,7 @@ public class ItemController {
     CartService cartService;
 
     @GetMapping("/{id}")
-    public String getCartItems(@PathVariable(name = "id") Long id,
+    public String getCartItem(@PathVariable(name = "id") Long id,
                                Model model) {
         ItemDto itemDto = itemDtoService.getItemDto(id);
         model.addAttribute("item", itemDto);

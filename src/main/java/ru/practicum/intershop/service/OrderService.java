@@ -8,6 +8,7 @@ import ru.practicum.intershop.repository.OrderRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -22,11 +23,16 @@ public class OrderService {
 
         for (CartItem cartItem : cartItems) {
             cartItem.setOrder(order);
+            cartItem.setPrice(cartItem.getItem().getPrice());
         }
         return orderRepository.save(order);
     }
 
     public List<Order> getOrders(){
         return orderRepository.findAll();
+    }
+
+    public Optional<Order> getOrder(Long id){
+        return orderRepository.findById(id);
     }
 }

@@ -27,6 +27,7 @@
             <span th:text="${item.getDescription()}"></span>
         </p>
         <form th:action="${'/intershop/items/'+item.getId()}" method="post">
+            <input type="hidden" name="count" th:value="${item.getCount()}" />
             <button name="action" value="minus">-</button>
             <span th:text="${item.getCount()}"></span>
             <button name="action" value="plus">+</button>

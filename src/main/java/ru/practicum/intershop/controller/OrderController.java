@@ -39,7 +39,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public String getOrder(@PathVariable("id") Long id,
-                           @RequestParam boolean newOrder,
+                           @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
                            Model model) {
         Order order = orderService.getOrder(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ с id " + id + " не найден"));

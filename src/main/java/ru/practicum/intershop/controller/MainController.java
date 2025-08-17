@@ -1,6 +1,7 @@
 package ru.practicum.intershop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.intershop.dto.ItemDto;
+import ru.practicum.intershop.model.Paging;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class MainController {
@@ -39,21 +39,26 @@ public class MainController {
             @RequestParam(defaultValue = "1") int pageNumber,  // номер текущей страницы
             Model model) {
 
-        List<ItemDto> itemDtos = itemDtoService.getAllItemsWithCart();
+//        List<ItemDto> itemDtos = itemDtoService.getAllItemsWithCart();
+//
+//        // Разбиение на строки по N товаров
+//        List<List<ItemDto>> itemsInRows = chunkItems(itemDtos, 3);  // 3 товара в ряду
 
-        // Разбиение на строки по N товаров
-        List<List<ItemDto>> itemsInRows = chunkItems(itemDtos, 3);  // 3 товара в ряду
+        Page<ItemDto> itemsPage = itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize);
 
-        Map<String, Object> pagingData = new HashMap<>();
-        pagingData.put("pageNumber", 1);  // Номер текущей страницы (с 1)
-        pagingData.put("pageSize", itemDtos.size());  // Размер страницы
-        pagingData.put("hasNext", false);  // Есть ли следующая страница
-        pagingData.put("hasPrevious", false);  // Есть ли предыдущая страница
+        // Разбиение на строки по 3 товара (только контент страницы)
+        List<List<ItemDto>> itemsInRows = chunkItems(itemsPage.getContent(), 3);
+
+
+        boolean hasNext = itemsPage.getContent().size() == pageSize;
+        boolean hasPrevious = pageNumber > 1;
+
+        Paging paging = new Paging(pageNumber, pageSize, hasNext, hasPrevious);
 
         model.addAttribute("items", itemsInRows);
         model.addAttribute("search", search);
         model.addAttribute("sort", sort);
-        model.addAttribute("paging", pagingData);
+        model.addAttribute("paging", paging);
 
         return "main";
     }

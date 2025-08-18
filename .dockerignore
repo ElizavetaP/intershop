@@ -1,0 +1,29 @@
+# Исключаем ненужные файлы из Docker контекста
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+
+# Build artifacts (но не исключаем готовый JAR)
+.gradle/
+*.war
+build/reports/
+build/test-results/
+build/tmp/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/

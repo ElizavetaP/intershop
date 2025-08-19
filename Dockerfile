@@ -1,30 +1,27 @@
-# Используем официальный образ OpenJDK 21
-FROM openjdk:21-jdk-slim
+# --------Сборка (builder) образа JDK + Gradle
+FROM eclipse-temurin:21-jdk-jammy AS build
+WORKDIR /src
 
-# Метаданные образа
-LABEL maintainer="intershop-app"
-LABEL description="Spring Boot Intershop Application"
+# Кэшируем зависимости: gradle файлы
+COPY gradlew ./
+COPY gradle ./gradle
+COPY build.gradle settings.gradle ./
+RUN chmod +x ./gradlew && ./gradlew --no-daemon dependencies || true
 
-# Создаем рабочую директорию
+# Теперь исходники
+COPY src ./src
+
+# Собираем fat-jar
+RUN ./gradlew --no-daemon clean bootJar
+
+# --------Рантайм (базовый образ только с JRE)
+FROM eclipse-temurin:21-jre-jammy AS runtime
 WORKDIR /app
 
-# Копируем Gradle wrapper и файлы конфигурации
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
+# Копируем только ar и даем имя app.jar
+ARG JAR_NAME=intershop-0.0.1-SNAPSHOT.jar
+COPY --from=build /src/build/libs/${JAR_NAME} /app/app.jar
 
-# Копируем исходный код
-COPY src src
-
-# Делаем gradlew исполняемым
-RUN chmod +x ./gradlew
-
-# Собираем приложение
-RUN ./gradlew bootJar --no-daemon
-
-# Открываем порт 8080
 EXPOSE 8080
-
-# Запускаем приложение
-CMD ["java", "-jar", "build/libs/intershop-0.0.1-SNAPSHOT.jar"]
+ENV JAVA_OPTS=""
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]

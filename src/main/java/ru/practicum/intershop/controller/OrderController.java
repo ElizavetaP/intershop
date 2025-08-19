@@ -42,7 +42,7 @@ public class OrderController {
                            @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
                            Model model) {
         Order order = orderService.getOrder(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ с id " + id + " не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The Order with id " + id + " is not found"));
         model.addAttribute("order", order);
         model.addAttribute("newOrder", newOrder);
         return "order";

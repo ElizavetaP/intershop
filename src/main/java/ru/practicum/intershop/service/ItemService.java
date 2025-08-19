@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.intershop.exception.ItemNotFoundException;
 import ru.practicum.intershop.model.Item;
 import ru.practicum.intershop.repository.ItemRepository;
 
@@ -23,7 +24,7 @@ public class ItemService {
 
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The Item with id " + id + " is not found"));
+                .orElseThrow(() -> new ItemNotFoundException(id));
     }
 
     public Page<Item> getItemsWithPagination(Pageable pageable) {

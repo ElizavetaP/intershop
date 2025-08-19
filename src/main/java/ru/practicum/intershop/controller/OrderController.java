@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.intershop.exception.OrderNotFoundException;
 import ru.practicum.intershop.model.CartItem;
 import ru.practicum.intershop.model.Order;
 import ru.practicum.intershop.service.CartService;
@@ -42,7 +43,7 @@ public class OrderController {
                            @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
                            Model model) {
         Order order = orderService.getOrder(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The Order with id " + id + " is not found"));
+                .orElseThrow(() -> new OrderNotFoundException(id));
         model.addAttribute("order", order);
         model.addAttribute("newOrder", newOrder);
         return "order";

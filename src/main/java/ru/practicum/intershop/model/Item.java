@@ -1,24 +1,28 @@
 package ru.practicum.intershop.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+@Table("item")
 @Getter
 @Setter
 public class Item {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Название не может быть пустым")
     private String title;
+    
     private String description;
 
     @Positive(message = "Цена должна быть положительной")
     private int price;
+    
+    @Column("img_path")
     private String imgPath;
 }

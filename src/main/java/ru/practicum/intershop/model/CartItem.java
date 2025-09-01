@@ -1,31 +1,36 @@
 package ru.practicum.intershop.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Id;
 
-@Entity
+@Table("cart_item")
 @Getter
 @Setter
 public class CartItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orders_id")
-    private Order order;
+    @Column("orders_id")
+    private Long ordersId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
-    private Item item;
+    @Column("item_id")
+    private Long itemId;
 
-    @Column(name = "quantity")
+    @Column("quantity")
     private int count;
 
-    @Column(name = "price")
+    @Column("price")
     private int price; // Цена на момент покупки
+
+    @Transient
+    private Order order;
+
+    @Transient
+    private Item item;
 
 }

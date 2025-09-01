@@ -1,31 +1,32 @@
 package ru.practicum.intershop.repository;
 
-import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.r2dbc.repository.Modifying;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.query.Param;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.intershop.model.CartItem;
 
-import java.util.List;
-import java.util.Optional;
+public interface CartItemRepository extends R2dbcRepository<CartItem, Long> {
 
-public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-
-    @Transactional
     @Modifying
-    @Query("UPDATE CartItem c SET c.count = c.count + 1 WHERE c.id = :id AND c.order IS NULL")
-    void incrementCountById(Long id);
+    @Query("UPDATE cart_item SET quantity = quantity + 1 WHERE id = :id AND orders_id IS NULL")
+    Mono<Integer> incrementCountById(@Param("id") Long id);
 
-    @Transactional
     @Modifying
-    @Query("UPDATE CartItem c SET c.count = c.count - 1 WHERE c.id = :id AND c.order IS NULL")
-    void decrementCountById(Long id);
+    @Query("UPDATE cart_item SET quantity = quantity - 1 WHERE id = :id AND orders_id IS NULL")
+    Mono<Integer> decrementCountById(@Param("id") Long id);
 
-    // Метод для получения одного CartItem по itemId, где order == null (заказ еще не создан)
-    @Query("SELECT c FROM CartItem c WHERE c.item.id = :itemId AND c.order IS NULL")
-    Optional<CartItem> getCartItemByItemIdAndOrderIsNull(Long itemId);
+    // Метод для получения одного CartItem по itemId, где orders_id == null (заказ еще не создан)
+    @Query("SELECT * FROM cart_item WHERE item_id = :itemId AND orders_id IS NULL")
+    Mono<CartItem> getCartItemByItemIdAndOrderIsNull(@Param("itemId") Long itemId);
 
-    @Query("SELECT c FROM CartItem c WHERE c.order IS NULL")
-    List<CartItem> getAllNewCartItem();
+    @Query("SELECT * FROM cart_item WHERE orders_id IS NULL")
+    Flux<CartItem> getAllNewCartItem();
+
+    // Дополнительные методы для работы с заказами
+    @Query("SELECT * FROM cart_item WHERE orders_id = :orderId")
+    Flux<CartItem> findByOrdersId(@Param("orderId") Long orderId);
 
 }

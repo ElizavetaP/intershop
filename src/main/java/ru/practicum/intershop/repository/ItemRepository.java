@@ -9,6 +9,31 @@ import ru.practicum.intershop.model.Item;
 
 public interface ItemRepository extends R2dbcRepository<Item, Long> {
 
+    // Поиск с сортировкой по названию
+    @Query("SELECT * FROM item WHERE " +
+            "LOWER(title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(description) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "ORDER BY title ASC " +
+            "LIMIT :limit OFFSET :offset")
+    Flux<Item> findByTitleOrDescriptionOrderByTitleAsc(
+            @Param("search") String search,
+            @Param("limit") int limit,
+            @Param("offset") long offset
+    );
+
+    // Поиск с сортировкой по цене
+    @Query("SELECT * FROM item WHERE " +
+            "LOWER(title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(description) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "ORDER BY price ASC " +
+            "LIMIT :limit OFFSET :offset")
+    Flux<Item> findByTitleOrDescriptionOrderByPriceAsc(
+            @Param("search") String search,
+            @Param("limit") int limit,
+            @Param("offset") long offset
+    );
+
+    // Поиск без сортировки
     @Query("SELECT * FROM item WHERE " +
             "LOWER(title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(description) LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -24,7 +49,15 @@ public interface ItemRepository extends R2dbcRepository<Item, Long> {
             "LOWER(description) LIKE LOWER(CONCAT('%', :search, '%'))")
     Mono<Long> countByTitleOrDescription(@Param("search") String search);
 
-    // Эффективная пагинация всех товаров (без поиска)
+    // Все товары с сортировкой по названию
+    @Query("SELECT * FROM item ORDER BY title ASC LIMIT :limit OFFSET :offset")
+    Flux<Item> findAllPaginatedOrderByTitleAsc(@Param("limit") int limit, @Param("offset") long offset);
+
+    // Все товары с сортировкой по цене
+    @Query("SELECT * FROM item ORDER BY price ASC LIMIT :limit OFFSET :offset")
+    Flux<Item> findAllPaginatedOrderByPriceAsc(@Param("limit") int limit, @Param("offset") long offset);
+
+    // Все товары без сортировки
     @Query("SELECT * FROM item LIMIT :limit OFFSET :offset")
     Flux<Item> findAllPaginated(@Param("limit") int limit, @Param("offset") long offset);
 }

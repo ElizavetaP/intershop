@@ -36,7 +36,7 @@ public class ItemDtoService {
     }
 
     public Mono<Page<ItemDto>> getItemsWithCart(String search, String sort, int pageNumber, int pageSize) {
-        return getItemsPage(search, sort, pageNumber, pageSize)
+        return itemService.getItemsWithSearch(search, sort, pageNumber, pageSize)
                 .flatMap(itemsPage -> 
                     cartService.getAllNewCartItem().collectList()
                         .map(cartItems -> {
@@ -44,28 +44,6 @@ public class ItemDtoService {
                             return new PageImpl<>(itemDtos, itemsPage.getPageable(), itemsPage.getTotalElements());
                         })
                 );
-    }
-
-    private Mono<Page<Item>> getItemsPage(String search, String sort, int pageNumber, int pageSize) {
-        Pageable pageable = createPageable(sort, pageNumber, pageSize);
-
-        // Если есть поиск
-        if (search != null && !search.trim().isEmpty()) {
-            return itemService.getItemsWithSearch(search, pageable);
-        }
-
-        // Без поиска
-        return itemService.getItemsWithPagination(pageable);
-    }
-
-    private Pageable createPageable(String sort, int pageNumber, int pageSize) {
-        Sort sorting = switch (sort.toUpperCase()) {
-            case "ALPHA" -> Sort.by("title").ascending();
-            case "PRICE" -> Sort.by("price").ascending();
-            default -> Sort.unsorted();
-        };
-
-        return PageRequest.of(pageNumber - 1, pageSize, sorting);
     }
 
     public List<ItemDto> getListItemDto(List<Item> items, List<CartItem> cartItems) {

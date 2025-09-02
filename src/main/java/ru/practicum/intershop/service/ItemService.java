@@ -2,10 +2,11 @@ package ru.practicum.intershop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.practicum.intershop.exception.ItemNotFoundException;
 import ru.practicum.intershop.model.Item;
 import ru.practicum.intershop.repository.ItemRepository;
@@ -18,21 +19,48 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    public List<Item> getAllItems() {
+    public Flux<Item> getAllItems() {
         return itemRepository.findAll();
     }
 
-    public Item getItemById(Long id) {
+    public Mono<Item> getItemById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException(id));
+                .onErrorMap(err -> new ItemNotFoundException(id));
     }
 
-    public Page<Item> getItemsWithPagination(Pageable pageable) {
-        return itemRepository.findAll(pageable);
+    public Mono<Page<Item>> getItemsWithPagination(Pageable pageable) {
+        return getItemsWithSearch("", pageable); // Пустой поиск = все товары
     }
 
-    public Page<Item> getItemsWithSearch(String search, Pageable pageable) {
-        return itemRepository.findByTitleOrDescription(search, pageable);
+    public Mono<Page<Item>> getItemsWithSearch(String search, Pageable pageable) {
+        int limit = pageable.getPageSize();
+        long offset = pageable.getOffset();
+
+        Mono<List<Item>> itemsMono;
+        Mono<Long> countMono;
+
+        // Выбираем метод в зависимости от наличия поиска
+        if (search.isEmpty()) {
+            itemsMono = getAllItemsPaginated(limit, offset);
+            countMono = itemRepository.count();
+        } else {
+            itemsMono = itemRepository
+                    .findByTitleOrDescription(search, limit, offset)
+                    .collectList();
+            countMono = itemRepository.countByTitleOrDescription(search);
+        }
+
+        return Mono.zip(itemsMono, countMono)
+                .map(tuple -> new PageImpl<>(
+                        tuple.getT1(), // List<Item>
+                        pageable,      // Pageable
+                        tuple.getT2()  // Long totalCount
+                ));
+    }
+
+    private Mono<List<Item>> getAllItemsPaginated(int limit, long offset) {
+        return itemRepository.findAllPaginated(limit, offset)
+                .collectList();
     }
 
 }

@@ -2,14 +2,16 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Витрина товаров</title>
 </head>
 
 <body>
-    <a href="/intershop/orders/" style="float:right;">
+    <a href="/orders/" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/intershop/cart/items" style="float:right;">
+    <a href="/cart/items" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <table style="width:70%;margin-left:auto;margin-right:auto;">
@@ -52,8 +54,8 @@
                 <table>
                     <tr>
                         <td>
-                            <a th:href="${'/intershop/items/'+item.getId()}">
-                                <img width="300" height="300" th:src="${'http://localhost:8080/intershop/images/'+item.getImgPath()}">
+                            <a th:href="${'/items/'+item.getId()}">
+                                <img width="300" height="300" th:src="@{/images/{imgPath}(imgPath=${item.getImgPath()})}">
                             </a>
                         </td>
                     </tr>
@@ -70,7 +72,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <form th:action="${'/intershop/main/items/'+item.getId()}" method="post">
+                            <form th:action="${'/main/items/'+item.getId()}" method="post">
                                 <input type="hidden" name="count" th:value="${item.getCount()}" />
                                 <button name="action" value="minus" th:if="${item.getCount() > 0}">-</button>
                                 <span th:text="${item.getCount()}"></span>

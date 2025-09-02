@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.practicum.intershop.exception.OrderNotFoundException;
 import ru.practicum.intershop.model.CartItem;
 import ru.practicum.intershop.model.Order;
 import ru.practicum.intershop.repository.CartItemRepository;
@@ -51,6 +52,7 @@ public class OrderService {
 
     public Mono<Order> getOrder(Long id) {
         return orderRepository.findById(id)
+                .switchIfEmpty(Mono.error(new OrderNotFoundException(id)))
                 .flatMap(this::loadOrderWithCartItems);
     }
 

@@ -1,18 +1,12 @@
 package ru.practicum.intershop.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.intershop.exception.OrderNotFoundException;
-import ru.practicum.intershop.model.CartItem;
-import ru.practicum.intershop.model.Order;
+import reactor.core.publisher.Mono;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.OrderService;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/orders")
@@ -25,28 +19,33 @@ public class OrderController {
     CartService cartService;
 
     @PostMapping("/buy")
-    public String buy() {
-        List<CartItem> cartItems = cartService.getAllNewCartItem();
-        Order createdOrder = orderService.createOrder(cartItems);
-        return "redirect:/orders/" + createdOrder.getId() + "?newOrder=true";
+    public Mono<String> buy() {
+        return cartService.getAllNewCartItem()
+                .collectList()
+                .flatMap(cartItems -> orderService.createOrder(cartItems))
+                .map(createdOrder -> "redirect:/orders/" + createdOrder.getId() + "?newOrder=true");
     }
 
     @GetMapping("/")
-    public String getOrders(Model model) {
-        List<Order> orders = orderService.getOrders();
-        model.addAttribute("orders", orders);
-        return "orders";
+    public Mono<String> getOrders(Model model) {
+        return orderService.getOrders()
+                .collectList()
+                .map(orders -> {
+                    model.addAttribute("orders", orders);
+                    return "orders";
+                });
     }
 
     @GetMapping("/{id}")
-    public String getOrder(@PathVariable("id") Long id,
-                           @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
-                           Model model) {
-        Order order = orderService.getOrder(id)
-                .orElseThrow(() -> new OrderNotFoundException(id));
-        model.addAttribute("order", order);
-        model.addAttribute("newOrder", newOrder);
-        return "order";
+    public Mono<String> getOrder(@PathVariable("id") Long id,
+                                 @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
+                                 Model model) {
+        return orderService.getOrder(id)
+                .map(order -> {
+                    model.addAttribute("order", order);
+                    model.addAttribute("newOrder", newOrder);
+                    return "order";
+                });
     }
 
 }

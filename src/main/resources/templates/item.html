@@ -2,22 +2,24 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Витрина товаров</title>
 </head>
 
 <body>
-    <a href="/intershop/orders/" style="float:right;">
+    <a href="/orders/" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/intershop/cart/items" style="float:right;">
+    <a href="/cart/items" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
-    <a href="/intershop/main/items" style="float:right;">
+    <a href="/main/items" style="float:right;">
         <b>ГЛАВНАЯ &cudarrr;</b>
     </a>
     <div style="width:70%;margin-left:auto;margin-right:auto;">
         <p>
-            <img width="300" height="300" th:src="${'http://localhost:8080/intershop/images/'+item.getImgPath()}">
+            <img width="300" height="300" th:src="@{/images/{imgPath}(imgPath=${item.getImgPath()})}">
         </p>
         <p>
             <b th:text="${item.getTitle()}"></b>
@@ -26,7 +28,7 @@
         <p>
             <span th:text="${item.getDescription()}"></span>
         </p>
-        <form th:action="${'/intershop/items/'+item.getId()}" method="post">
+        <form th:action="${'/items/'+item.getId()}" method="post">
             <input type="hidden" name="count" th:value="${item.getCount()}" />
             <button name="action" value="minus">-</button>
             <span th:text="${item.getCount()}"></span>

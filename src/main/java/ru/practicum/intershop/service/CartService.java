@@ -68,6 +68,7 @@ public class CartService {
                     cartItem.setItemId(itemId);
                     cartItem.setItem(item); // @Transient поле
                     cartItem.setCount(0);
+      //              cartItem.setPrice(item.getPrice()); // Устанавливаем цену из товара
                     return cartItemRepository.save(cartItem);
                 });
     }
@@ -87,6 +88,10 @@ public class CartService {
         return itemService.getItemById(cartItem.getItemId())
                 .map(item -> {
                     cartItem.setItem(item);
+                    // Если цена не установлена, берем текущую цену товара
+                  //  if (cartItem.getPrice() == 0) {
+                        cartItem.setPrice(item.getPrice());
+               //     }
                     return cartItem;
                 });
     }

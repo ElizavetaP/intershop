@@ -25,7 +25,7 @@ public class ItemService {
 
     public Mono<Item> getItemById(Long id) {
         return itemRepository.findById(id)
-                .onErrorMap(err -> new ItemNotFoundException(id));
+                .switchIfEmpty(Mono.error(new ItemNotFoundException(id)));
     }
 
     public Mono<Page<Item>> getItemsWithPagination(Pageable pageable) {

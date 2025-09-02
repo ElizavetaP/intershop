@@ -2,17 +2,19 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заказ</title>
 </head>
 
 <body>
-<a href="/intershop/orders/" style="float:right;">
+<a href="/orders/" style="float:right;">
     <b>ЗАКАЗЫ &cudarrr;</b>
 </a>
-<a href="/intershop/cart/items" style="float:right;">
+<a href="/cart/items" style="float:right;">
     <b>КОРЗИНА &cudarrr;</b>
 </a>
-<a href="/intershop/main/items" style="float:right;">
+<a href="/main/items" style="float:right;">
     <b>ГЛАВНАЯ &cudarrr;</b>
 </a>
 <h1 style="text-align:center" th:if="${newOrder}">Поздравляем! Успешная покупка! &#128578;</h1>
@@ -27,8 +29,8 @@
             <table>
                 <tr>
                     <td>
-                        <a th:href="${'/intershop/items/'+cartItem.getId()}">
-                            <img width="300" height="300" th:src="${'http://localhost:8080/intershop/images/'+cartItem.getItem().getImgPath()}">
+                        <a th:href="${'/items/'+cartItem.getId()}">
+                            <img width="300" height="300" th:src="@{/images/{imgPath}(imgPath=${cartItem.getItem().getImgPath()})}">
                         </a>
                     </td>
                 </tr>

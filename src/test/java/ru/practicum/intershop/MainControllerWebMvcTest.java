@@ -3,12 +3,15 @@ package ru.practicum.intershop;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Mono;
 import ru.practicum.intershop.controller.MainController;
 import ru.practicum.intershop.dto.ItemDto;
 import ru.practicum.intershop.service.CartService;
@@ -18,21 +21,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(MainController.class)
+@WebFluxTest(MainController.class)
 class MainControllerWebMvcTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockBean
     private ItemDtoService itemDtoService;
 
-    @MockBean 
+    @MockBean
     private CartService cartService;
 
     private ItemDto testItemDto1;
@@ -62,120 +64,176 @@ class MainControllerWebMvcTest {
     }
 
     @Test
-    void redirectToItems_ShouldRedirectToMainItems() throws Exception {
-        mockMvc.perform(get("/"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main/items"));
+    void redirectToItems_ShouldRedirectToMainItems() {
+        webTestClient.get()
+                .uri("/")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
     }
 
     @Test
-    void getItems_ShouldReturnMainPageWithDefaultParameters() throws Exception {
-        when(itemDtoService.getItemsWithCart("", "NO", 1, 10)).thenReturn(testPage);
+    void getItems_ShouldReturnMainPageWithDefaultParameters() {
+        when(itemDtoService.getItemsWithCart("", "NO", 1, 10)).thenReturn(Mono.just(testPage));
 
-        mockMvc.perform(get("/main/items"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("main"))
-                .andExpect(model().attributeExists("items"))
-                .andExpect(model().attributeExists("search"))
-                .andExpect(model().attributeExists("sort"))
-                .andExpect(model().attributeExists("paging"))
-                .andExpect(model().attribute("search", ""))
-                .andExpect(model().attribute("sort", "NO"));
+        webTestClient.get()
+                .uri("/main/items")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(result -> {
+                    // Проверяем, что возвращается не пустая HTML страница
+                    String body = result.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("Витрина товаров")); // Проверяем наличие элементов страницы
+                });
 
         verify(itemDtoService).getItemsWithCart("", "NO", 1, 10);
     }
 
     @Test
-    void getItems_ShouldHandleRequestParametersCorrectly() throws Exception {
-        when(itemDtoService.getItemsWithCart("кепка", "PRICE", 2, 5)).thenReturn(testPage);
+    void getItems_ShouldHandleRequestParametersCorrectly() {
+        when(itemDtoService.getItemsWithCart("кепка", "PRICE", 2, 5)).thenReturn(Mono.just(testPage));
 
-        mockMvc.perform(get("/main/items")
-                .param("search", "кепка")
-                .param("sort", "PRICE")
-                .param("pageNumber", "2")
-                .param("pageSize", "5"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("main"))
-                .andExpect(model().attribute("search", "кепка"))
-                .andExpect(model().attribute("sort", "PRICE"));
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/main/items")
+                        .queryParam("search", "кепка")
+                        .queryParam("sort", "PRICE")
+                        .queryParam("pageNumber", "2")
+                        .queryParam("pageSize", "5")
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(result -> {
+                    String body = result.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("кепка")); // Проверяем наличие поискового запроса
+                });
 
         verify(itemDtoService).getItemsWithCart("кепка", "PRICE", 2, 5);
     }
 
     @Test
-    void getItems_WithEmptyResults_ShouldHandleGracefully() throws Exception {
+    void getItems_WithEmptyResults_ShouldHandleGracefully() {
         Page<ItemDto> emptyPage = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0);
-        when(itemDtoService.getItemsWithCart("", "NO", 1, 10)).thenReturn(emptyPage);
+        when(itemDtoService.getItemsWithCart("", "NO", 1, 10)).thenReturn(Mono.just(emptyPage));
 
-        mockMvc.perform(get("/main/items"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("main"))
-                .andExpect(model().attributeExists("items"));
+        webTestClient.get()
+                .uri("/main/items")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(result -> {
+                    String body = result.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("Витрина товаров")); // Проверяем, что страница загрузилась
+                });
 
         verify(itemDtoService).getItemsWithCart("", "NO", 1, 10);
     }
 
     @Test
-    void changeCountOfItem_PlusAction_ShouldCallServiceAndRedirect() throws Exception {
-        mockMvc.perform(post("/main/items/1")
-                .param("action", "plus")
-                .param("count", "2"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main/items"));
+    void changeCountOfItem_PlusAction_ShouldCallServiceAndRedirect() {
+        when(cartService.changeCountOfItemByItemId(1L, "plus", 2)).thenReturn(Mono.empty());
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("action", "plus");
+        formData.add("count", "2");
+
+        webTestClient.post()
+                .uri("/main/items/1")
+                .bodyValue(formData)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
 
         verify(cartService).changeCountOfItemByItemId(1L, "plus", 2);
     }
 
     @Test
-    void changeCountOfItem_MinusAction_ShouldCallServiceAndRedirect() throws Exception {
-        mockMvc.perform(post("/main/items/5")
-                .param("action", "minus")
-                .param("count", "1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main/items"));
+    void changeCountOfItem_MinusAction_ShouldCallServiceAndRedirect() {
+        when(cartService.changeCountOfItemByItemId(5L, "minus", 1)).thenReturn(Mono.empty());
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("action", "minus");
+        formData.add("count", "1");
+
+        webTestClient.post()
+                .uri("/main/items/5")
+                .bodyValue(formData)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
 
         verify(cartService).changeCountOfItemByItemId(5L, "minus", 1);
     }
 
     @Test
-    void changeCountOfItem_DeleteAction_ShouldCallServiceAndRedirect() throws Exception {
-        mockMvc.perform(post("/main/items/3")
-                .param("action", "delete")
-                .param("count", "5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main/items"));
+    void changeCountOfItem_DeleteAction_ShouldCallServiceAndRedirect() {
+        when(cartService.changeCountOfItemByItemId(3L, "delete", 5)).thenReturn(Mono.empty());
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("action", "delete");
+        formData.add("count", "5");
+
+        webTestClient.post()
+                .uri("/main/items/3")
+                .bodyValue(formData)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
 
         verify(cartService).changeCountOfItemByItemId(3L, "delete", 5);
     }
 
-    @Test 
-    void changeCountOfItem_MissingActionParameter_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/main/items/1")
-                .param("count", "2"))
-                .andExpect(status().isBadRequest());
+    @Test
+    void changeCountOfItem_MissingActionParameter_ShouldRedirect() {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("count", "2");
+
+        webTestClient.post()
+                .uri("/main/items/1")
+                .bodyValue(formData)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
 
         verify(cartService, never()).changeCountOfItemByItemId(anyLong(), anyString(), anyInt());
     }
 
     @Test
-    void changeCountOfItem_MissingCountParameter_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/main/items/1")
-                .param("action", "plus"))
-                .andExpect(status().isBadRequest());
+    void changeCountOfItem_MissingCountParameter_ShouldRedirect() {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("action", "plus");
+
+        webTestClient.post()
+                .uri("/main/items/1")
+                .bodyValue(formData)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().location("/main/items");
 
         verify(cartService, never()).changeCountOfItemByItemId(anyLong(), anyString(), anyInt());
     }
 
 
     @Test
-    void getItems_WithSearch_ShouldPassCorrectParameters() throws Exception {
-        when(itemDtoService.getItemsWithCart("кепка", "NO", 1, 10)).thenReturn(testPage);
+    void getItems_WithSearch_ShouldPassCorrectParameters() {
+        when(itemDtoService.getItemsWithCart("кепка", "NO", 1, 10)).thenReturn(Mono.just(testPage));
 
-        mockMvc.perform(get("/main/items")
-                .param("search", "кепка"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("main"))
-                .andExpect(model().attribute("search", "кепка"));
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/main/items")
+                        .queryParam("search", "кепка")
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(result -> {
+                    String body = result.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains("кепка"));
+                });
 
         verify(itemDtoService).getItemsWithCart("кепка", "NO", 1, 10);
     }

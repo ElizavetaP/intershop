@@ -2,17 +2,17 @@ package ru.practicum.intershop;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ru.practicum.intershop.model.Item;
 import ru.practicum.intershop.repository.ItemRepository;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@SpringBootTest
+@ActiveProfiles("test")
 class ItemRepositoryTest {
 
     @Autowired
@@ -20,22 +20,21 @@ class ItemRepositoryTest {
 
     @Test
     void findByTitleOrDescription_ShouldFindByTitleAndCaseInsensitive() {
-        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Item> result = itemRepository.findByTitleOrDescription("КЕПКА", 10, 0)
+                .collectList()
+                .block();
 
-        Page<Item> result = itemRepository.findByTitleOrDescription("КЕПКА", pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getTitle()).isEqualTo("Кепка синяя");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Кепка");
     }
 
     @Test
     void findByTitleOrDescription_ShouldReturnEmptyForNoMatches() {
-        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Item> result = itemRepository.findByTitleOrDescription("несуществующий", 10, 0)
+                .collectList()
+                .block();
 
-        Page<Item> result = itemRepository.findByTitleOrDescription("несуществующий", pageRequest);
-
-        assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result).isEmpty();
     }
 
 }

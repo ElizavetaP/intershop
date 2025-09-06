@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import ru.practicum.intershop.dto.ItemDto;
 import ru.practicum.intershop.model.Paging;
@@ -68,24 +67,22 @@ public class MainController {
     }
 
     @PostMapping("/main/items/{id}")
-    public Mono<String> changeCountOfItem(@PathVariable("id") Long id, ServerWebExchange exchange) {
-        return exchange.getFormData()
-                .flatMap(formData -> {
-                    String action = formData.getFirst("action");
-                    String countStr = formData.getFirst("count");
+    public Mono<String> changeCountOfItem(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "action", required = false) String action,
+            @RequestParam(value = "count", required = false) String countStr) {
 
-                    if (action == null || countStr == null) {
-                        return Mono.just("redirect:/main/items");
-                    }
-
-                    try {
-                        Integer count = Integer.parseInt(countStr);
-                        return cartService.changeCountOfItemByItemId(id, action, count)
-                                .then(Mono.just("redirect:/main/items"));
-                    } catch (NumberFormatException e) {
-                        return Mono.just("redirect:/main/items");
-                    }
-                });
+        if (action == null || countStr == null) {
+            return Mono.just("redirect:/main/items");
+        }
+        
+        try {
+            Integer count = Integer.parseInt(countStr);
+            return cartService.changeCountOfItemByItemId(id, action, count)
+                    .then(Mono.just("redirect:/main/items"));
+        } catch (NumberFormatException e) {
+            return Mono.just("redirect:/main/items");
+        }
     }
 
 }

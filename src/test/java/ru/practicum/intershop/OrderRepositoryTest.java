@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.test.StepVerifier;
 import ru.practicum.intershop.model.Order;
 import ru.practicum.intershop.repository.OrderRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -21,30 +21,30 @@ class OrderRepositoryTest {
 
     @Test
     void findById_ShouldReturnOrderWhenExists() {
-        Order result = orderRepository.findById(1L)
-                .block();
-
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertNotNull(result.getCreatedAt());
+        StepVerifier.create(orderRepository.findById(1L))
+                .assertNext(order -> {
+                    assertThat(order).isNotNull();
+                    assertThat(order.getId()).isEqualTo(1L);
+                    assertThat(order.getCreatedAt()).isNotNull();
+                })
+                .verifyComplete();
     }
 
     @Test
     void findById_ShouldReturnEmptyForNonExistentId() {
-        Order result = orderRepository.findById(999L)
-                .block();
-
-        assertNull(result);
+        StepVerifier.create(orderRepository.findById(999L))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
     void findAll_ShouldReturnAllOrders() {
-        List<Order> result = orderRepository.findAll()
-                .collectList()
-                .block();
-
-        assertNotNull(result);
-        assertTrue(result.size() >= 3);
+        StepVerifier.create(orderRepository.findAll().collectList())
+                .assertNext(orders -> {
+                    assertThat(orders).isNotNull();
+                    assertThat(orders.size()).isGreaterThanOrEqualTo(3);
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -52,18 +52,13 @@ class OrderRepositoryTest {
         Order order = new Order();
         order.setCreatedAt(LocalDateTime.now());
 
-        Order savedOrder = orderRepository.save(order)
-                .block();
-
-        assertNotNull(savedOrder);
-        assertNotNull(savedOrder.getId());
-        assertNotNull(savedOrder.getCreatedAt());
-
-        Order foundOrder = orderRepository.findById(savedOrder.getId())
-                .block();
-        
-        assertNotNull(foundOrder);
-        assertEquals(savedOrder.getId(), foundOrder.getId());
+        StepVerifier.create(orderRepository.save(order))
+                .assertNext(savedOrder -> {
+                    assertThat(savedOrder).isNotNull();
+                    assertThat(savedOrder.getId()).isNotNull();
+                    assertThat(savedOrder.getCreatedAt()).isNotNull();
+                })
+                .verifyComplete();
     }
 
 }

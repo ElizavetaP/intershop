@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: API для сервиса платежей интернет-магазина
+  version: 1.0.0
+  contact:
+    name: Intershop Team
+
+tags:
+  - name: balance
+    description: Операции с балансом
+  - name: payment
+    description: Операции платежей
+
+paths:
+  /api/v1/balance:
+    get:
+      tags:
+        - balance
+      summary: Получить текущий баланс
+      description: Возвращает текущий баланс пользователя для проверки возможности совершения покупки
+      operationId: getBalance
+      responses:
+        '200':
+          description: Текущий баланс успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+              examples:
+                success:
+                  summary: Успешный ответ
+                  value:
+                    balance: 15000
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                server_error:
+                  summary: Ошибка сервера
+                  value:
+                    message: "Ошибка получения баланса"
+                    code: "INTERNAL_ERROR"
+
+  /api/v1/payment:
+    post:
+      tags:
+        - payment
+      summary: Обработать платеж
+      description: Списывает указанную сумму с баланса пользователя за заказ
+      operationId: processPayment
+      requestBody:
+        required: true
+        description: Данные для обработки платежа
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+            examples:
+              valid_payment:
+                summary: Валидный платеж
+                value:
+                  amount: 1200
+                  orderId: 123
+      responses:
+        '200':
+          description: Платеж успешно обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+              examples:
+                success:
+                  summary: Успешный платеж
+                  value:
+                    success: true
+                    transactionId: "txn_123456789"
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_amount:
+                  summary: Некорректная сумма
+                  value:
+                    message: "Сумма должна быть больше 0"
+                    code: "INVALID_AMOUNT"
+                invalid_order:
+                  summary: Некорректный заказ
+                  value:
+                    message: "ID заказа обязателен"
+                    code: "INVALID_ORDER_ID"
+        '402':
+          description: Недостаточно средств на балансе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_funds:
+                  summary: Недостаточно средств
+                  value:
+                    message: "Недостаточно средств на счете. Баланс: 1000, требуется: 1200"
+                    code: "INSUFFICIENT_FUNDS"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                server_error:
+                  summary: Ошибка сервера
+                  value:
+                    message: "Ошибка обработки платежа"
+                    code: "INTERNAL_ERROR"
+
+components:
+  schemas:
+    BalanceResponse:
+      type: object
+      required:
+        - balance
+      properties:
+        balance:
+          type: integer
+          format: int64
+          description: Текущий баланс пользователя
+          minimum: 0
+          example: 1500
+      description: Ответ с текущим балансом
+
+    PaymentRequest:
+      type: object
+      required:
+        - amount
+        - orderId
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Сумма платежа
+          minimum: 1
+          example: 1200
+        orderId:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор заказа
+          minimum: 1
+          example: 123
+      description: Запрос на обработку платежа
+
+    PaymentResponse:
+      type: object
+      required:
+        - success
+        - transactionId
+      properties:
+        success:
+          type: boolean
+          description: Успешность операции платежа
+          example: true
+        transactionId:
+          type: string
+          description: Уникальный идентификатор транзакции
+          pattern: '^txn_[a-zA-Z0-9]+$'
+          example: "txn_123456789"
+      description: Результат обработки платежа
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Сообщение об ошибке
+          example: "Недостаточно средств на счете"
+        code:
+          type: string
+          description: Код ошибки
+          enum:
+            - INVALID_AMOUNT
+            - INVALID_ORDER_ID
+            - INSUFFICIENT_FUNDS
+            - INTERNAL_ERROR
+          example: "INSUFFICIENT_FUNDS"
+        details:
+          type: object
+          description: Дополнительные детали ошибки
+          additionalProperties: true
+          example:
+            orderId: 123
+            requestedAmount: 1200

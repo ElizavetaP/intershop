@@ -1,0 +1,26 @@
+// Конфигурация сборки для intershop-main модуля
+
+dependencies {
+    // Существующие зависимости из корневого build.gradle
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'io.r2dbc:r2dbc-h2'
+    runtimeOnly 'com.h2database:h2'
+    
+    // Для интеграции с платежным сервисом (позже добавим)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient
+}
+
+// Настройки JAR файла
+jar {
+    archiveBaseName = 'intershop-main'
+    archiveVersion = '1.0.0'
+}
+
+bootJar {
+    archiveBaseName = 'intershop-main'
+    archiveVersion = '1.0.0'
+}

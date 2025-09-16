@@ -1,0 +1,22 @@
+// Конфигурация сборки для payment-service модуля
+
+dependencies {
+    // Основные зависимости для RESTful API сервиса
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // Для OpenAPI генерации (позже добавим)
+    // implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    // implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
+}
+
+// Настройки JAR файла
+jar {
+    archiveBaseName = 'payment-service'
+    archiveVersion = '1.0.0'
+}
+
+bootJar {
+    archiveBaseName = 'payment-service'
+    archiveVersion = '1.0.0'
+}

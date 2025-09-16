@@ -1,0 +1,11 @@
+# Исключаем ненужные файлы из Docker контекста
+.gradle/
+build/
+!build/libs/
+src/
+.git/
+.idea/
+*.iml
+*.log
+.DS_Store
+README.md

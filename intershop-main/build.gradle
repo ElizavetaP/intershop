@@ -15,6 +15,9 @@ dependencies {
 
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
+
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
 }
 
 // Генерация клиента для платежного сервиса

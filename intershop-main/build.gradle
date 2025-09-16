@@ -1,20 +1,48 @@
-// Конфигурация сборки для intershop-main модуля
-
-dependencies {
-    // Существующие зависимости из корневого build.gradle
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-    implementation 'io.r2dbc:r2dbc-h2'
-    runtimeOnly 'com.h2database:h2'
-    
-    // Для интеграции с платежным сервисом (позже добавим)
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient
+plugins {
+    id 'org.openapi.generator'
 }
 
-// Настройки JAR файла
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'io.r2dbc:r2dbc-h2'
+    runtimeOnly 'com.h2database:h2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
+}
+
+// Генерация клиента для платежного сервиса
+openApiGenerate {
+    generatorName.set("java")
+    inputSpec.set("$rootDir/api-specs/payment-api.yaml")
+    outputDir.set("$buildDir/generated")
+    apiPackage.set("ru.practicum.intershop.payment.client.api")
+    modelPackage.set("ru.practicum.intershop.payment.client.model")
+    configOptions.set([
+        library: "webclient",
+        reactive: "true",
+        useSpringBoot3: "true",
+        dateLibrary: "java8"
+    ])
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+// Генерируем код перед компиляцией
+compileJava.dependsOn tasks.openApiGenerate
+
 jar {
     archiveBaseName = 'intershop-main'
     archiveVersion = '1.0.0'

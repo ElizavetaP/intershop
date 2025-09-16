@@ -2,28 +2,40 @@
 .git
 .gitignore
 README.md
-Dockerfile
+*.md
 .dockerignore
 
 # Build artifacts (но не исключаем готовый JAR)
 .gradle/
-*.war
-build/reports/
-build/test-results/
-build/tmp/
+*/build/reports/
+*/build/test-results/
+*/build/tmp/
+*/build/classes/
+*/build/resources/
+*/build/generated/
+# Оставляем */build/libs/
 
 # IDE files
 .idea/
 *.iml
 .vscode/
+*.iws
+*.ipr
 
 # OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
 
 # Logs
 *.log
+logs/
 
 # Temporary files
 tmp/
 temp/
+*.tmp
+
+# Test files (не нужны в Docker)
+*/src/test/

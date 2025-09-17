@@ -42,8 +42,6 @@ spring:
       enabled: true
       force: true
 
-
-
   h2:
     console:
       enabled: true

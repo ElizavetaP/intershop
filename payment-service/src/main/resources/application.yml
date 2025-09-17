@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: payment-service
+
+  # HTTP кодировка
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.payment: DEBUG
+    org.springframework.web: INFO
+    reactor.netty: INFO

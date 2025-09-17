@@ -11,7 +11,9 @@ dependencies {
     implementation 'io.r2dbc:r2dbc-h2'
     runtimeOnly 'com.h2database:h2'
 
+    // Redis для кеширования товаров
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'

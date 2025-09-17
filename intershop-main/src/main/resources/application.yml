@@ -24,6 +24,15 @@ spring:
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 
+  # Redis конфигурация (как в уроке)
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:127.0.0.1}
+      port: 6379
+  cache:
+    redis:
+      time-to-live: PT3M
+
   # Thymeleaf автоконфигурация
   thymeleaf:
     encoding: UTF-8
@@ -50,3 +59,5 @@ logging:
   level:
     org.springframework.r2dbc: DEBUG
     io.r2dbc.h2: DEBUG
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: INFO

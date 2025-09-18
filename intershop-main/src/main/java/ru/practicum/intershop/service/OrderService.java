@@ -57,14 +57,14 @@ public class OrderService {
     }
 
     @Autowired
-    private ItemService itemService;
+    private CachedItemService cachedItemService;
 
     // Загрузка заказа с элементами корзины
     private Mono<Order> loadOrderWithCartItems(Order order) {
         return cartItemRepository.findByOrdersId(order.getId())
                 .flatMap(cartItem -> 
                     // Загружаем Item для каждого CartItem
-                    itemService.getItemById(cartItem.getItemId())
+                        cachedItemService.getItemById(cartItem.getItemId())
                         .map(item -> {
                             cartItem.setItem(item); // @Transient поле
                             return cartItem;

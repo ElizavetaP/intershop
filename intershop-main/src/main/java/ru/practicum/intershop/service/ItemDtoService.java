@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 public class ItemDtoService {
 
     @Autowired
+    private CachedItemService cachedItemService;
+
+    @Autowired
     private ItemService itemService;
 
     @Autowired
@@ -26,7 +29,7 @@ public class ItemDtoService {
 
     public Flux<ItemDto> getAllItemsWithCart() {
         return Mono.zip(
-                itemService.getAllItems().collectList(),    // Все товары
+                cachedItemService.getAllItems().collectList(),    // Все товары
                 cartService.getAllNewCartItem().collectList() // Все элементы корзины
         ).flatMapMany(tuple -> {
             List<Item> items = tuple.getT1();
@@ -57,7 +60,7 @@ public class ItemDtoService {
 
     public Mono<ItemDto> getItemDto(Long itemId) {
         return Mono.zip(
-                itemService.getItemById(itemId),
+                cachedItemService.getItemById(itemId),
                 cartService.getNewCartItemByItemId(itemId)
                     .map(Optional::of)
                     .defaultIfEmpty(Optional.empty())

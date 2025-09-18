@@ -21,7 +21,7 @@ public class CartService {
     CartItemRepository cartItemRepository;
 
     @Autowired
-    ItemService itemService;
+    CachedItemService cachedItemService;
 
     public Flux<CartItem> getAllNewCartItem() {
         return cartItemRepository.getAllNewCartItem()
@@ -53,22 +53,21 @@ public class CartService {
     public Mono<Void> changeCountOfItemByItemId(Long itemId, String action, int currentCount) {
         return getNewCartItemByItemId(itemId)
                 .switchIfEmpty(
-                    //прежде чем увеличить count, создаем cartItem, если он отсутствует в корзине.
-                    action.equals(ACTION_INCREASE) ? 
-                        createCartItem(itemId) : 
-                        Mono.empty()
+                        //прежде чем увеличить count, создаем cartItem, если он отсутствует в корзине.
+                        action.equals(ACTION_INCREASE) ?
+                                createCartItem(itemId) :
+                                Mono.empty()
                 )
                 .flatMap(cartItem -> performCartAction(cartItem.getId(), action, currentCount));
     }
 
     public Mono<CartItem> createCartItem(Long itemId) {
-        return itemService.getItemById(itemId)
+        return cachedItemService.getItemById(itemId)
                 .flatMap(item -> {
                     CartItem cartItem = new CartItem();
                     cartItem.setItemId(itemId);
                     cartItem.setItem(item); // @Transient поле
                     cartItem.setCount(0);
-      //              cartItem.setPrice(item.getPrice()); // Устанавливаем цену из товара
                     return cartItemRepository.save(cartItem);
                 });
     }
@@ -85,13 +84,10 @@ public class CartService {
 
     // метод для загрузки Item в CartItem
     private Mono<CartItem> loadCartItemWithItem(CartItem cartItem) {
-        return itemService.getItemById(cartItem.getItemId())
+        return cachedItemService.getItemById(cartItem.getItemId())
                 .map(item -> {
                     cartItem.setItem(item);
-                    // Если цена не установлена, берем текущую цену товара
-                  //  if (cartItem.getPrice() == 0) {
-                        cartItem.setPrice(item.getPrice());
-               //     }
+                    cartItem.setPrice(item.getPrice());
                     return cartItem;
                 });
     }

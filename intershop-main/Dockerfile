@@ -8,6 +8,9 @@ COPY gradle ./gradle
 COPY build.gradle ./
 COPY settings.gradle ./
 
+# Копируем OpenAPI спецификации (нужны для генерации клиента)
+COPY api-specs ./api-specs
+
 # Копируем файлы модуля intershop-main
 COPY intershop-main/build.gradle ./intershop-main/
 COPY intershop-main/src ./intershop-main/src

@@ -8,6 +8,9 @@ COPY gradle ./gradle
 COPY build.gradle ./
 COPY settings.gradle ./
 
+# Копируем OpenAPI спецификации (для генерации кода)
+COPY api-specs ./api-specs
+
 # Копируем файлы модуля payment-service
 COPY payment-service/build.gradle ./payment-service/
 COPY payment-service/src ./payment-service/src

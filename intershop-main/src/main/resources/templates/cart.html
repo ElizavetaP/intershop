@@ -51,11 +51,27 @@
             <b th:text="'Итого: '+${total}+' руб.'"></b>
         </td>
     </tr>
+    <tr th:if="${balance != null}">
+        <td style="text-align:right">
+            <span th:text="'Ваш баланс: '+${balance}+' руб.'" 
+                  th:style="${balance >= total} ? 'color: green;' : 'color: red;'"></span>
+        </td>
+    </tr>
     <tr>
         <td style="text-align:right">
-            <form action="/orders/buy" method="post" th:if="${!empty}">
+            <form action="/orders/buy" method="post" th:if="${canBuy}">
                 <button>Купить</button>
             </form>
+            <div th:if="${!canBuy && !empty}">
+                <button disabled style="background-color: #ccc; cursor: not-allowed;">
+                    Купить
+                </button>
+                <div th:if="${balance != null && balance < total}" style="color: red; font-size: 12px;">
+                    Недостаточно средств
+                </div>
+                <div th:if="${paymentError != null}" style="color: red; font-size: 12px;" th:text="${paymentError}">
+                </div>
+            </div>
         </td>
     </tr>
 </table>

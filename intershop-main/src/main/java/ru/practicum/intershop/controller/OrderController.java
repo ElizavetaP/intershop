@@ -23,7 +23,8 @@ public class OrderController {
         return cartService.getAllNewCartItem()
                 .collectList()
                 .flatMap(cartItems -> orderService.processOrder(cartItems))
-                .map(createdOrder -> "redirect:/orders/" + createdOrder.getId() + "?newOrder=true");
+                .map(createdOrder -> "redirect:/orders/" + createdOrder.getId() + "?newOrder=true")
+                .onErrorReturn("redirect:/cart/items");
     }
 
     @GetMapping("/")

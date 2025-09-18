@@ -1,5 +1,7 @@
 package ru.practicum.payment.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.payment.exception.InsufficientFundsException;
@@ -7,11 +9,17 @@ import ru.practicum.payment.exception.InsufficientFundsException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Service
 public class PaymentService {
     
     // Эмуляция баланса пользователя
-    private final AtomicLong currentBalance = new AtomicLong(10000L);
+    private final AtomicLong currentBalance;
+    
+    public PaymentService(@Value("${payment.account.initial-balance:10000}") long initialBalance) {
+        this.currentBalance = new AtomicLong(initialBalance);
+        log.info("Баланс пользователя: {} руб.", initialBalance);
+    }
     
     /**
      * Получить текущий баланс пользователя

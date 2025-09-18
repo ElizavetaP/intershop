@@ -12,9 +12,22 @@ spring:
       enabled: true
       force: true
 
+payment:
+  account:
+    initial-balance: 15000  # баланс пользователя
 logging:
   level:
     root: INFO
     ru.practicum.payment: DEBUG
     org.springframework.web: INFO
     reactor.netty: INFO
+
+---
+# Локальная разработка
+spring.config.activate.on-profile: local
+payment.account.initial-balance: 50000
+
+---
+# Docker окружение
+spring.config.activate.on-profile: docker
+payment.account.initial-balance: 10000

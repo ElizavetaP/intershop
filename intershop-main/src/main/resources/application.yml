@@ -7,6 +7,10 @@ image:
 spring:
   application:
     name: intershop
+  
+  # Профиль по умолчанию для локальной разработки
+  profiles:
+    default: local
     
   # R2DBC конфигурация для H2
   r2dbc:
@@ -55,9 +59,27 @@ spring:
     console:
       enabled: true
 
+# Настройки платежного сервиса
+payment:
+  service:
+    url: ${PAYMENT_SERVICE_URL:http://localhost:8081}
+    timeout: 5000
+
 logging:
   level:
+    # Базовые настройки для внешних библиотек
     org.springframework.r2dbc: DEBUG
     io.r2dbc.h2: DEBUG
     org.springframework.data.redis: DEBUG
     io.lettuce.core: INFO
+
+---
+# Локальная разработка
+spring.config.activate.on-profile: local
+logging.level.ru.practicum.intershop: DEBUG
+
+---
+# Docker окружение
+spring.config.activate.on-profile: docker
+logging.level.root: INFO
+logging.level.ru.practicum.intershop: INFO

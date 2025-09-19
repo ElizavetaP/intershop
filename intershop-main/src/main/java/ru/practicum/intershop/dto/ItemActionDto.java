@@ -2,7 +2,7 @@ package ru.practicum.intershop.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +14,6 @@ public class ItemActionDto {
     private String action;
     
     @NotNull(message = "Count is required")
-    @Positive(message = "Count must be positive")
+    @PositiveOrZero(message = "Count must be positive")
     private Integer count;
 }

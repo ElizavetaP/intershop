@@ -34,15 +34,12 @@ public class PaymentClientService {
         
         return balanceApi.getBalanceWithHttpInfo()
                 .map(responseEntity -> {
-                    BalanceResponse balance = responseEntity.getBody();
-                    if (balance != null) {
-                        log.debug("Получен баланс: {}", balance.getBalance());
-                        return balance.getBalance();
-                    }
-                    log.error("Платежный сервис вернул пустой баланс)");
-                    throw new PaymentServiceException("Пустой баланс");
+                    BalanceResponse balance = validateResponse(responseEntity.getBody(), 
+                            "Платежный сервис вернул пустой баланс");
+                    log.debug("Получен баланс: {}", balance.getBalance());
+                    return balance.getBalance();
                 })
-                .doOnError(error -> log.error("Ошибка при получении баланса", error));
+                .doOnError(logError("Ошибка при получении баланса"));
     }
 
     /**
@@ -59,17 +56,29 @@ public class PaymentClientService {
         
         return paymentApi.processPaymentWithHttpInfo(request)
                 .map(responseEntity -> {
-                    PaymentResponse response = responseEntity.getBody();
-                    if (response != null) {
-                        boolean success = Boolean.TRUE.equals(response.getSuccess());
-                        log.debug("Результат платежа: success={}, transactionId={}", 
-                                success, response.getTransactionId());
-                        return new PaymentResult(success, response.getTransactionId(), null);
-                    }
-                    log.error("Платежный сервис вернул некорректный ответ");
-                    throw new PaymentServiceException("Платежный сервис вернул некорректный ответ");
+                    PaymentResponse response = validateResponse(responseEntity.getBody(),
+                            "Платежный сервис вернул некорректный ответ");
+                    boolean success = Boolean.TRUE.equals(response.getSuccess());
+                    log.debug("Результат платежа: success={}, transactionId={}", 
+                            success, response.getTransactionId());
+                    return new PaymentResult(success, response.getTransactionId(), null);
                 })
-                .doOnError(error -> log.error("Ошибка при обработке платежа", error));
+                .doOnError(logError("Ошибка при обработке платежа"));
+    }
+
+    /**
+     * Проверяет response на null и выбрасывает исключение в случае ошибки
+     */
+    private <T> T validateResponse(T response, String exceptionMessage) {
+        if (response == null) {
+            log.error(exceptionMessage);
+            throw new PaymentServiceException(exceptionMessage);
+        }
+        return response;
+    }
+
+    private java.util.function.Consumer<Throwable> logError(String errorMessage) {
+        return error -> log.error(errorMessage, error);
     }
 
     /**

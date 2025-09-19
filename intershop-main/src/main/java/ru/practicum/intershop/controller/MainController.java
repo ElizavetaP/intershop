@@ -1,13 +1,16 @@
 package ru.practicum.intershop.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
+import ru.practicum.intershop.dto.ItemActionDto;
 import ru.practicum.intershop.dto.ItemDto;
 import ru.practicum.intershop.model.Paging;
 import ru.practicum.intershop.service.CartService;
@@ -16,6 +19,7 @@ import ru.practicum.intershop.service.ItemDtoService;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Controller
 public class MainController {
 
@@ -69,20 +73,11 @@ public class MainController {
     @PostMapping("/main/items/{id}")
     public Mono<String> changeCountOfItem(
             @PathVariable("id") Long id,
-            @RequestParam(value = "action", required = false) String action,
-            @RequestParam(value = "count", required = false) String countStr) {
+            @ModelAttribute ItemActionDto itemActionDto) {
 
-        if (action == null || countStr == null) {
-            return Mono.just("redirect:/main/items");
-        }
-        
-        try {
-            Integer count = Integer.parseInt(countStr);
-            return cartService.changeCountOfItemByItemId(id, action, count)
-                    .then(Mono.just("redirect:/main/items"));
-        } catch (NumberFormatException e) {
-            return Mono.just("redirect:/main/items");
-        }
+        Integer count = Integer.parseInt(itemActionDto.getCount());
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), count)
+                .then(Mono.just("redirect:/main/items"));
     }
 
 }

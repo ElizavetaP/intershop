@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import ru.practicum.intershop.dto.ItemActionDto;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
 
@@ -30,9 +31,9 @@ public class ItemController {
 
     @PostMapping("/{id}")
     public Mono<String> changeCountOfItem(@PathVariable("id") Long id,
-                                          @RequestParam("action") String action,
-                                          @RequestParam(value = "count") Integer count) {
-        return cartService.changeCountOfItemByItemId(id, action, count)
+                                          @ModelAttribute ItemActionDto itemActionDto) {
+        Integer count = Integer.parseInt(itemActionDto.getCount());
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), count)
                 .then(Mono.just("redirect:/items/" + id));
     }
 }

@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ItemActionDto {
     private String action;
-    private String count;
+    private Integer count;
 }

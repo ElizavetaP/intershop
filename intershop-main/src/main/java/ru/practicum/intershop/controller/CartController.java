@@ -50,8 +50,7 @@ public class CartController {
     @PostMapping("/items/{id}")
     public Mono<String> changeCountOfItem(@PathVariable("id") Long id,
                                           @ModelAttribute ItemActionDto itemActionDto) {
-        Integer count = Integer.parseInt(itemActionDto.getCount());
-        return cartService.performCartAction(id, itemActionDto.getAction(), count)
+        return cartService.performCartAction(id, itemActionDto.getAction(), itemActionDto.getCount())
                 .then(Mono.just("redirect:/cart/items"));
     }
 }

@@ -9,16 +9,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Mono;
+import jakarta.validation.constraints.Pattern;
 
 @RestController
+@Validated
 public class ImageController {
 
     @Value("${image.folder}")
     private String imageFolder;
 
     @GetMapping("/images/{imgPath}")
-    public Mono<ResponseEntity<Resource>> getImage(@PathVariable(name = "imgPath") String imgPath) {
+    public Mono<ResponseEntity<Resource>> getImage(
+            @PathVariable(name = "imgPath") 
+            @Pattern(regexp = "^[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|gif)$", 
+                     message = "Invalid image file name") 
+            String imgPath) {
         return Mono.fromCallable(() -> {
             String path = imageFolder + "/" + imgPath;
             Resource resource = new ClassPathResource(path);

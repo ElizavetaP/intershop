@@ -188,7 +188,7 @@ class MainControllerWebMvcTest {
     }
 
     @Test
-    void changeCountOfItem_MissingActionParameter_ShouldRedirect() {
+    void changeCountOfItem_MissingActionParameter_ShouldReturnError() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("count", "2");
 
@@ -196,14 +196,13 @@ class MainControllerWebMvcTest {
                 .uri("/main/items/1")
                 .bodyValue(formData)
                 .exchange()
-                .expectStatus().is3xxRedirection()
-                .expectHeader().location("/main/items");
+                .expectStatus().is5xxServerError();
 
         verify(cartService, never()).changeCountOfItemByItemId(anyLong(), anyString(), anyInt());
     }
 
     @Test
-    void changeCountOfItem_MissingCountParameter_ShouldRedirect() {
+    void changeCountOfItem_MissingCountParameter_ShouldReturnError() {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("action", "plus");
 
@@ -211,8 +210,7 @@ class MainControllerWebMvcTest {
                 .uri("/main/items/1")
                 .bodyValue(formData)
                 .exchange()
-                .expectStatus().is3xxRedirection()
-                .expectHeader().location("/main/items");
+                .expectStatus().is5xxServerError();
 
         verify(cartService, never()).changeCountOfItemByItemId(anyLong(), anyString(), anyInt());
     }

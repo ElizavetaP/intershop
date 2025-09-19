@@ -1,5 +1,6 @@
 package ru.practicum.intershop.model;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -9,8 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Table("item")
-@Getter
-@Setter
+@Data
 public class Item {
     @Id
     private Long id;

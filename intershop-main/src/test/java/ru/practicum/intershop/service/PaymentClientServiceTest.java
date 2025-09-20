@@ -22,6 +22,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentClientServiceTest {
 
+    private static final String TRANSACTION_ID = "txn_12345";
+    private static final String BALANCE_SERVICE_ERROR = "Сервис недоступен";
+    private static final String PAYMENT_SERVICE_ERROR = "Платежный сервис недоступен";
+
     @Mock
     private BalanceApi balanceApi;
 
@@ -52,7 +56,7 @@ class PaymentClientServiceTest {
     @Test
     void shouldHandleBalanceServiceError() {
         when(balanceApi.getBalanceWithHttpInfo())
-                .thenReturn(Mono.error(new RuntimeException("Сервис недоступен")));
+                .thenReturn(Mono.error(new RuntimeException(BALANCE_SERVICE_ERROR)));
 
         StepVerifier.create(paymentClientService.getCurrentBalance())
                 .expectError(RuntimeException.class)
@@ -63,7 +67,7 @@ class PaymentClientServiceTest {
     void shouldSuccessfullyProcessPayment() {
         Long amount = 5000L;
         Long orderId = 123L;
-        String transactionId = "txn_12345";
+        String transactionId = TRANSACTION_ID;
 
         PaymentResponse paymentResponse = new PaymentResponse()
                 .success(true)
@@ -109,7 +113,7 @@ class PaymentClientServiceTest {
         Long orderId = 999L;
 
         when(paymentApi.processPaymentWithHttpInfo(any(PaymentRequest.class)))
-                .thenReturn(Mono.error(new RuntimeException("Платежный сервис недоступен")));
+                .thenReturn(Mono.error(new RuntimeException(PAYMENT_SERVICE_ERROR)));
 
         StepVerifier.create(paymentClientService.processPayment(amount, orderId))
                 .expectError(RuntimeException.class)

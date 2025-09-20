@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class PaymentService {
     
+    public static final String TXN_PREFIX = "txn_";
+    
     // Эмуляция баланса пользователя
     private final AtomicLong currentBalance;
     
@@ -58,7 +60,7 @@ public class PaymentService {
                 );
             }
 
-            String transactionId = "txn_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+            String transactionId = TXN_PREFIX + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
             
             return new PaymentResult(true, transactionId);
         });

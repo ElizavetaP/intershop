@@ -4,12 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Mono;
+import jakarta.validation.constraints.Positive;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.OrderService;
 
 @Controller
 @RequestMapping("/orders")
+@Validated
 public class OrderController {
 
     @Autowired
@@ -38,7 +41,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public Mono<String> getOrder(@PathVariable("id") Long id,
+    public Mono<String> getOrder(@PathVariable("id") @Positive(message = "Order ID must be positive") Long id,
                                  @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
                                  Model model) {
         return orderService.getOrder(id)

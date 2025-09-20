@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Mono;
 import ru.practicum.intershop.dto.ItemActionDto;
 import ru.practicum.intershop.dto.ItemDto;
@@ -21,6 +24,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
+@Validated
 public class MainController {
 
     @Autowired
@@ -36,10 +40,10 @@ public class MainController {
 
     @GetMapping("/main/items")
     public Mono<String> getItems(
-            @RequestParam(defaultValue = "") String search,  // строка с поисков по названию/описанию товара
+            @RequestParam(defaultValue = "") String search,  // строка с поиском по названию/описанию товара
             @RequestParam(defaultValue = "NO") String sort,  // сортировка перечисление NO, ALPHA, PRICE
-            @RequestParam(defaultValue = "10") int pageSize,  // максимальное число товаров на странице
-            @RequestParam(defaultValue = "1") int pageNumber,  // номер текущей страницы
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be greater than 0") int pageNumber,
             Model model) {
 
         return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize)
@@ -73,10 +77,8 @@ public class MainController {
     @PostMapping("/main/items/{id}")
     public Mono<String> changeCountOfItem(
             @PathVariable("id") Long id,
-            @ModelAttribute ItemActionDto itemActionDto) {
-
-        Integer count = Integer.parseInt(itemActionDto.getCount());
-        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), count)
+            @Valid @ModelAttribute ItemActionDto itemActionDto) {
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount())
                 .then(Mono.just("redirect:/main/items"));
     }
 

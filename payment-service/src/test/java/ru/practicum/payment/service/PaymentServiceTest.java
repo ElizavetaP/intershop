@@ -39,8 +39,8 @@ class PaymentServiceTest {
                 .assertNext(paymentResult -> {
                     assertTrue(paymentResult.isSuccess(), "Платеж должен быть успешным");
                     assertNotNull(paymentResult.getTransactionId(), "ID транзакции не должен быть null");
-                    assertTrue(paymentResult.getTransactionId().startsWith("txn_"), 
-                             "ID транзакции должен начинаться с 'txn_'");
+                    assertTrue(paymentResult.getTransactionId().startsWith(PaymentService.TXN_PREFIX), 
+                             "ID транзакции должен начинаться с '" + PaymentService.TXN_PREFIX + "'");
                 })
                 .verifyComplete();
 

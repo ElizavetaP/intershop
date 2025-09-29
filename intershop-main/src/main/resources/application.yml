@@ -59,6 +59,23 @@ spring:
     console:
       enabled: true
 
+  # OAuth2 конфигурация для взаимодействия с платежным сервисом  
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            token-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/intershop/protocol/openid-connect/token
+            jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/intershop/protocol/openid-connect/certs
+            issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/intershop
+        registration:
+          payment-service:
+            provider: keycloak
+            client-id: intershop-client
+            client-secret: intershop-client-secret
+            authorization-grant-type: client_credentials
+            scope: payment:read,payment:write
+
 # Настройки платежного сервиса
 payment:
   service:

@@ -1,3 +1,14 @@
+-- Создание таблицы для пользователей (User)
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,      -- Уникальное имя пользователя
+    password VARCHAR(100) NOT NULL,            -- BCrypt хеш пароля
+    email VARCHAR(255) NOT NULL UNIQUE,        -- Уникальный email
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',  -- Роль пользователя (USER, ADMIN)
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,     -- Активен ли аккаунт
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Дата создания
+);
+
 -- Создание таблицы для товаров (Item)
 CREATE TABLE IF NOT EXISTS item (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

@@ -1,3 +1,10 @@
+-- Вставка тестовых пользователей
+-- Пароли: admin = "admin", user = "user" (BCrypt хеши)
+INSERT INTO user (username, password, email, role, enabled)
+VALUES
+    ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iYqiSfFe5ldNQeGkuaiuIWEKfMJK', 'admin@intershop.com', 'ADMIN', true),
+    ('user', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'user@intershop.com', 'USER', true);
+
 -- Вставка данных в таблицу item (товары)
 INSERT INTO item (title, description, price, img_path)
 VALUES

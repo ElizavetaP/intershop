@@ -17,8 +17,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/intershop
-          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8080}/realms/intershop/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop/protocol/openid-connect/certs
 
 payment:
   account:

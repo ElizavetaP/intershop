@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -14,7 +13,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
-@Table("user")
+@Table("users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,15 +44,13 @@ public class User {
     @Column("enabled")
     private Boolean enabled;
 
-    @CreatedDate
     @Column("created_at")
     private LocalDateTime createdAt;
 
     /**
      * Создает нового пользователя
-     * Дата создания, роль и статус enabled установятся автоматически:
-     * - createdAt - через @CreatedDate
-     * - role и enabled - через БД DEFAULT значения
+     * Дата создания, роль и статус enabled установятся автоматически
+     * через БД DEFAULT значения при сохранении
      */
     public static User createNew(String username, String password, String email) {
         return User.builder()

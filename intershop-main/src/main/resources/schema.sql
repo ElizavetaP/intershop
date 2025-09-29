@@ -1,5 +1,5 @@
--- Создание таблицы для пользователей (User)
-CREATE TABLE IF NOT EXISTS user (
+-- Создание таблицы для пользователей (Users)
+CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,      -- Уникальное имя пользователя
     password VARCHAR(100) NOT NULL,            -- BCrypt хеш пароля

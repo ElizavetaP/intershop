@@ -88,7 +88,7 @@
                     <tr>
                         <td th:text="${item.getDescription()}"></td>
                     </tr>
-                    <tr>
+                    <tr th:if="${isAuthenticated}">
                         <td>
                             <form th:action="${'/main/items/'+item.getId()}" method="post">
                                 <input type="hidden" name="count" th:value="${item.getCount()}" />

@@ -55,7 +55,7 @@ public class MainController {
         model.addAttribute("isAuthenticated", isAuthenticated);
         model.addAttribute("username", username);
 
-        return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize)
+        return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize, username)
                 .map(itemsPage -> {
                     // Разбиение на строки по 3 товара (только контент страницы)
                     List<List<ItemDto>> itemsInRows = chunkItems(itemsPage.getContent(), 3);
@@ -86,8 +86,9 @@ public class MainController {
     @PostMapping("/main/items/{id}")
     public Mono<String> changeCountOfItem(
             @PathVariable("id") Long id,
-            @Valid @ModelAttribute ItemActionDto itemActionDto) {
-        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount())
+            @Valid @ModelAttribute ItemActionDto itemActionDto,
+            Principal principal) {
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount(), principal.getName())
                 .then(Mono.just("redirect:/main/items"));
     }
 

@@ -10,6 +10,8 @@ import ru.practicum.intershop.dto.ItemActionDto;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping("/items")
 public class ItemController {
@@ -22,8 +24,15 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public Mono<String> getCartItem(@PathVariable(name = "id") Long id,
+                                    Principal principal,
                                     Model model) {
-        return itemDtoService.getItemDto(id)
+
+        boolean isAuthenticated = principal != null;
+        String username = isAuthenticated ? principal.getName() : null;
+        
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        
+        return itemDtoService.getItemDto(id, username)
                 .map(itemDto -> {
                     model.addAttribute("item", itemDto);
                     return "item";
@@ -32,8 +41,9 @@ public class ItemController {
 
     @PostMapping("/{id}")
     public Mono<String> changeCountOfItem(@PathVariable("id") Long id,
-                                          @Valid @ModelAttribute ItemActionDto itemActionDto) {
-        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount())
+                                          @Valid @ModelAttribute ItemActionDto itemActionDto,
+                                          Principal principal) {
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount(), principal.getName())
                 .then(Mono.just("redirect:/items/" + id));
     }
 }

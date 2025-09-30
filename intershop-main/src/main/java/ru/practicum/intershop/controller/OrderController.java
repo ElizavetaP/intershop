@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Positive;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.OrderService;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping("/orders")
 @Validated
@@ -22,17 +24,19 @@ public class OrderController {
     CartService cartService;
 
     @PostMapping("/buy")
-    public Mono<String> buy() {
-        return cartService.getAllNewCartItem()
+    public Mono<String> buy(Principal principal) {
+        return cartService.getAllNewCartItem(principal.getName())
                 .collectList()
-                .flatMap(cartItems -> orderService.processOrder(cartItems))
+                .flatMap(cartItems -> orderService.processOrder(cartItems, principal.getName()))
                 .map(createdOrder -> "redirect:/orders/" + createdOrder.getId() + "?newOrder=true")
                 .onErrorReturn("redirect:/cart/items");
     }
 
     @GetMapping("/")
-    public Mono<String> getOrders(Model model) {
-        return orderService.getOrders()
+    public Mono<String> getOrders(Model model, Principal principal) {
+        model.addAttribute("currentUser", principal.getName());
+
+        return orderService.getOrders(principal.getName())
                 .collectList()
                 .map(orders -> {
                     model.addAttribute("orders", orders);
@@ -43,8 +47,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public Mono<String> getOrder(@PathVariable("id") @Positive(message = "Order ID must be positive") Long id,
                                  @RequestParam(value = "newOrder", defaultValue = "false") boolean newOrder,
-                                 Model model) {
-        return orderService.getOrder(id)
+                                 Model model, Principal principal) {
+
+        model.addAttribute("currentUser", principal.getName());
+
+        return orderService.getOrder(id, principal.getName())
                 .map(order -> {
                     model.addAttribute("order", order);
                     model.addAttribute("newOrder", newOrder);

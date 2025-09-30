@@ -22,9 +22,13 @@ CREATE TABLE IF NOT EXISTS item (
 -- Создание таблицы для заказов (Orders)
 CREATE TABLE IF NOT EXISTS orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
- --   total_sum DECIMAL(10, 2) NOT NULL,     -- Общая сумма заказа
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Дата оформления заказа
+    username VARCHAR(50) NOT NULL,              -- Пользователь, создавший заказ
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Дата оформления заказа
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE  -- Связь с таблицей users
 );
+
+-- Индекс для быстрого поиска заказов пользователя
+CREATE INDEX IF NOT EXISTS idx_orders_username ON orders(username);
 
 -- Создание таблицы для товаров в корзине (CartItem)
 CREATE TABLE IF NOT EXISTS cart_item (
@@ -32,7 +36,14 @@ CREATE TABLE IF NOT EXISTS cart_item (
     item_id BIGINT NOT NULL,                -- Идентификатор товара
     quantity INT NOT NULL,                  -- Количество товара в корзине
     orders_id BIGINT,                        -- Идентификатор заказа (связь с orders)
+    username VARCHAR(50),                    -- Пользователь (для корзины)
     price INT NOT NULL,                    --Цена на момент покупки
     FOREIGN KEY (item_id) REFERENCES item(id) ON DELETE CASCADE,  -- Связь с таблицей item
-    FOREIGN KEY (orders_id) REFERENCES orders(id) ON DELETE CASCADE  -- Связь с таблицей orders
+    FOREIGN KEY (orders_id) REFERENCES orders(id) ON DELETE CASCADE,  -- Связь с таблицей orders
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE  -- Связь с таблицей users
 );
+
+-- Индекс для быстрого поиска товаров в корзине пользователя
+CREATE INDEX IF NOT EXISTS idx_cart_item_username ON cart_item(username);
+-- Индекс для быстрого поиска товаров в заказе
+CREATE INDEX IF NOT EXISTS idx_cart_item_orders_id ON cart_item(orders_id);

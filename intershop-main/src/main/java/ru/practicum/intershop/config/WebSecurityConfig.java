@@ -19,14 +19,10 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeExchange(exchanges -> exchanges
-                        // Публичные страницы
-                        .pathMatchers("/", "/main/**", "/images/**").permitAll()
-                        .pathMatchers("/logout").permitAll()
+                        // Публичные страницы (просмотр витрины и товаров)
+                        .pathMatchers("/", "/main/**", "/items/**", "/images/**").permitAll()
                         
-                        // Защищенные страницы
-                        .pathMatchers("/login", "/cart/**", "/orders/**").authenticated()
-                        
-                        // Все остальные требуют аутентификации
+                        // Все остальные требуют аутентификации (включая /logout)
                         .anyExchange().authenticated()
                 )
                 

@@ -19,6 +19,7 @@ import ru.practicum.intershop.model.Paging;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,15 @@ public class MainController {
             @RequestParam(defaultValue = "NO") String sort,  // сортировка перечисление NO, ALPHA, PRICE
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be greater than 0") int pageNumber,
+            Principal principal,
             Model model) {
+
+        // Добавляем информацию об авторизации в модель
+        boolean isAuthenticated = principal != null;
+        String username = isAuthenticated ? principal.getName() : null;
+        
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("username", username);
 
         return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize)
                 .map(itemsPage -> {

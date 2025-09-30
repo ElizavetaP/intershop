@@ -28,9 +28,9 @@ public class OrderService {
     @Autowired
     PaymentClientService paymentClientService;
 
-    public Mono<Order> processOrder(List<CartItem> cartItems) {
+    public Mono<Order> processOrder(List<CartItem> cartItems, String username) {
         long totalAmount = calculateTotalAmount(cartItems);
-        log.debug("Обработка заказа на сумму: {}", totalAmount);
+        log.debug("Обработка заказа на сумму: {} для пользователя: {}", totalAmount, username);
 
         // проверяем платеж с временным ID
         long tempOrderId = System.currentTimeMillis();
@@ -42,7 +42,7 @@ public class OrderService {
                                 tempOrderId, paymentResult.getTransactionId());
                         
                         // Платеж прошел - создаем полный заказ
-                        return createOrder(cartItems);
+                        return createOrder(cartItems, username);
                     } else {
                         log.warn("Платеж отклонен для временного заказа {}: {}", 
                                 tempOrderId, paymentResult.getErrorMessage());
@@ -56,13 +56,15 @@ public class OrderService {
     /**
      * Создает полный заказ с товарами после успешного платежа
      */
-    private Mono<Order> createOrder(List<CartItem> cartItems) {
+    private Mono<Order> createOrder(List<CartItem> cartItems, String username) {
         Order order = new Order();
+        order.setUsername(username);
         order.setCreatedAt(LocalDateTime.now());
         
         return orderRepository.save(order)
                 .flatMap(savedOrder -> {
-                    log.debug("Заказ создан с ID: {} после успешного платежа", savedOrder.getId());
+                    log.debug("Заказ создан с ID: {} для пользователя: {} после успешного платежа", 
+                            savedOrder.getId(), username);
                     // Сохраняем товары с привязкой к заказу
                     return saveCartItemsWithOrder(savedOrder, cartItems)
                             .collectList()
@@ -95,13 +97,13 @@ public class OrderService {
                 });
     }
 
-    public Flux<Order> getOrders() {
-        return orderRepository.findAll()
+    public Flux<Order> getOrders(String username) {
+        return orderRepository.findByUsername(username)
                 .flatMap(this::loadOrderWithCartItems);
     }
 
-    public Mono<Order> getOrder(Long id) {
-        return orderRepository.findById(id)
+    public Mono<Order> getOrder(Long id, String username) {
+        return orderRepository.findByIdAndUsername(id, username)
                 .switchIfEmpty(Mono.error(new OrderNotFoundException(id)))
                 .flatMap(this::loadOrderWithCartItems);
     }

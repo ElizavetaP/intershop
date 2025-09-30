@@ -31,10 +31,12 @@ public class ItemDtoService {
     @Autowired
     private CartService cartService;
 
-    public Flux<ItemDto> getAllItemsWithCart() {
+    public Flux<ItemDto> getAllItemsWithCart(String username) {
         return Mono.zip(
                 cachedItemService.getAllItems().collectList(),    // Все товары
-                cartService.getAllNewCartItem().collectList() // Все элементы корзины
+                username != null 
+                    ? cartService.getAllNewCartItem(username).collectList()  // Корзина авторизованного из БД
+                    : Mono.just(List.<CartItem>of())  // Для анонимного пользователя создаем пустой список
         ).flatMapMany(tuple -> {
             List<Item> items = tuple.getT1();
             List<CartItem> cartItems = tuple.getT2();
@@ -42,24 +44,28 @@ public class ItemDtoService {
         });
     }
 
-    public Mono<Page<ItemDto>> getItemsWithCart(String search, String sort, int pageNumber, int pageSize) {
-        return getItemsWithCartCached(search, sort, pageNumber, pageSize)
+    public Mono<Page<ItemDto>> getItemsWithCart(String search, String sort, int pageNumber, int pageSize, String username) {
+        return getItemsWithCartCached(search, sort, pageNumber, pageSize, username)
                 .map(CacheablePageDto::toPage);
     }
 
-    @Cacheable(value = "itemsWithCart", key = "#search + '_' + #sort + '_' + #pageNumber + '_' + #pageSize")  
-    public Mono<CacheablePageDto<ItemDto>> getItemsWithCartCached(String search, String sort, int pageNumber, int pageSize) {
-        log.debug("Загрузка товаров с корзиной из БД: search={}, sort={}, page={}, size={}", search, sort, pageNumber, pageSize);
+    @Cacheable(value = "itemsWithCart", key = "#search + '_' + #sort + '_' + #pageNumber + '_' + #pageSize + '_' + (#username != null ? #username : 'anonymous')")  
+    public Mono<CacheablePageDto<ItemDto>> getItemsWithCartCached(String search, String sort, int pageNumber, int pageSize, String username) {
+        log.debug("Загрузка товаров с корзиной из БД: search={}, sort={}, page={}, size={}, user={}", 
+                search, sort, pageNumber, pageSize, username != null ? username : "anonymous");
         
         return itemService.getItemsWithSearch(search, sort, pageNumber, pageSize)
-                .flatMap(itemsPage -> 
-                    cartService.getAllNewCartItem().collectList()
-                        .map(cartItems -> {
-                            List<ItemDto> itemDtos = getListItemDto(itemsPage.getContent(), cartItems);
-                            Page<ItemDto> page = new PageImpl<>(itemDtos, itemsPage.getPageable(), itemsPage.getTotalElements());
-                            return new CacheablePageDto<>(page);
-                        })
-                );
+                .flatMap(itemsPage -> {
+                    Mono<List<CartItem>> cartItemsMono = username != null
+                        ? cartService.getAllNewCartItem(username).collectList()  // Корзина авторизованного из БД
+                        : Mono.just(List.<CartItem>of());  // Пустой список для анонимных
+                    
+                    return cartItemsMono.map(cartItems -> {
+                        List<ItemDto> itemDtos = getListItemDto(itemsPage.getContent(), cartItems);
+                        Page<ItemDto> page = new PageImpl<>(itemDtos, itemsPage.getPageable(), itemsPage.getTotalElements());
+                        return new CacheablePageDto<>(page);
+                    });
+                });
     }
 
     public List<ItemDto> getListItemDto(List<Item> items, List<CartItem> cartItems) {
@@ -71,12 +77,14 @@ public class ItemDtoService {
                 .collect(Collectors.toList());
     }
 
-    public Mono<ItemDto> getItemDto(Long itemId) {
+    public Mono<ItemDto> getItemDto(Long itemId, String username) {
         return Mono.zip(
                 cachedItemService.getItemById(itemId),
-                cartService.getNewCartItemByItemId(itemId)
-                    .map(Optional::of)
-                    .defaultIfEmpty(Optional.empty())
+                username != null
+                    ? cartService.getNewCartItemByItemId(itemId, username)
+                        .map(Optional::of)
+                        .defaultIfEmpty(Optional.<CartItem>empty())
+                    : Mono.just(Optional.<CartItem>empty())  // Пустой Optional для анонимных
         ).map(tuple -> {
             Item item = tuple.getT1();
             Optional<CartItem> optionalCartItem = tuple.getT2();

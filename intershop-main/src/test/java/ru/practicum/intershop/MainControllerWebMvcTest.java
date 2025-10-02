@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import ru.practicum.intershop.config.WebSecurityConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +14,11 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Mono;
+import ru.practicum.intershop.config.TestSecurityConfig;
 import ru.practicum.intershop.controller.MainController;
 import ru.practicum.intershop.dto.ItemDto;
-import ru.practicum.intershop.repository.UserRepository;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(MainController.class)
-@Import(WebSecurityConfig.class)
+@Import(TestSecurityConfig.class) //тестовая конфигурация
 class MainControllerWebMvcTest {
 
     @Autowired
@@ -41,12 +39,6 @@ class MainControllerWebMvcTest {
 
     @MockBean
     private CartService cartService;
-
-    @MockBean
-    private UserRepository userRepository;
-
-    @MockBean
-    private PasswordEncoder passwordEncoder;
 
     private ItemDto testItemDto1;
     private ItemDto testItemDto2;
@@ -152,7 +144,7 @@ class MainControllerWebMvcTest {
         formData.add("action", "plus");
         formData.add("count", "2");
 
-        webTestClient.mutateWith(mockUser("user"))  // Эмулируем авторизованного пользователя
+        webTestClient.mutateWith(mockUser("user"))
                 .post()
                 .uri("/main/items/1")
                 .bodyValue(formData)
@@ -171,7 +163,7 @@ class MainControllerWebMvcTest {
         formData.add("action", "minus");
         formData.add("count", "1");
 
-        webTestClient.mutateWith(mockUser("user"))  // Эмулируем авторизованного пользователя
+        webTestClient.mutateWith(mockUser("user"))
                 .post()
                 .uri("/main/items/5")
                 .bodyValue(formData)
@@ -190,7 +182,7 @@ class MainControllerWebMvcTest {
         formData.add("action", "delete");
         formData.add("count", "5");
 
-        webTestClient.mutateWith(mockUser("user"))  // Эмулируем авторизованного пользователя
+        webTestClient.mutateWith(mockUser("user"))
                 .post()
                 .uri("/main/items/3")
                 .bodyValue(formData)

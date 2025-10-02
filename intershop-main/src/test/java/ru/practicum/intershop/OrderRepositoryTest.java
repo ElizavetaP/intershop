@@ -3,6 +3,7 @@ package ru.practicum.intershop;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
 import ru.practicum.intershop.model.Order;
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class OrderRepositoryTest {
 
     @Autowired
@@ -51,6 +53,7 @@ class OrderRepositoryTest {
     void save_ShouldPersistNewOrder() {
         Order order = new Order();
         order.setCreatedAt(LocalDateTime.now());
+        order.setUsername("user");
 
         StepVerifier.create(orderRepository.save(order))
                 .assertNext(savedOrder -> {

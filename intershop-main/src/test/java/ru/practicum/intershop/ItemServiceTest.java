@@ -3,6 +3,7 @@ package ru.practicum.intershop;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import reactor.test.StepVerifier;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(properties = {
     "spring.sql.init.data-locations=classpath:test-data.sql"
 })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class ItemServiceTest {
 
     @Autowired
@@ -26,9 +28,9 @@ class ItemServiceTest {
     void getAllItems_ShouldReturnAllItems() {
         StepVerifier.create(itemService.getAllItems().collectList())
                 .assertNext(items -> {
-                    assertThat(items).hasSize(5);
+                    assertThat(items).hasSize(7);
                     assertThat(items).extracting(Item::getTitle)
-                            .contains("Кепка синяя", "Шапка красная", "Куртка зимняя", "Футболка зеленая", "Шарф женский");
+                            .contains("Кепка", "Шапка", "Куртка", "Шарф", "Рубашка", "Футболка", "Майка");
                 })
                 .verifyComplete();
     }
@@ -39,8 +41,8 @@ class ItemServiceTest {
                 .assertNext(item -> {
                     assertThat(item).isNotNull();
                     assertThat(item.getId()).isEqualTo(1L);
-                    assertThat(item.getTitle()).isEqualTo("Кепка синяя");
-                    assertThat(item.getDescription()).isEqualTo("Описание кепки синего цвета для тестов");
+                    assertThat(item.getTitle()).isEqualTo("Кепка");
+                    assertThat(item.getDescription()).isEqualTo("Кепка синяя");
                     assertThat(item.getPrice()).isEqualTo(1000);
                 })
                 .verifyComplete();

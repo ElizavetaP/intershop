@@ -22,25 +22,26 @@ class OAuth2ResourceServerTest {
     private WebTestClient webTestClient;
 
     /**
-     * Запрос без аутентификации к /balance
+     * Запрос без аутентификации к /api/v1/balance
      */
     @Test
     void shouldDenyAccessToBalanceWithoutToken() {
         webTestClient
                 .get()
-                .uri("/balance")
+                .uri("/api/v1/balance")
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
 
     /**
-     * Запрос без аутентификации к /payment
+     * Запрос без аутентификации к /api/v1/payment
      */
     @Test
     void shouldDenyAccessToPaymentWithoutToken() {
         webTestClient
                 .post()
-                .uri("/payment")
+                .uri("/api/v1/payment")
+                .header("Content-Type", "application/json")
                 .bodyValue("""
                         {
                             "amount": 1000,
@@ -52,14 +53,14 @@ class OAuth2ResourceServerTest {
     }
 
     /**
-     * Проверка доступа к /balance с моком авторизации
+     * Проверка доступа к /api/v1/balance с моком авторизации
      */
     @Test
     @WithMockUser
     void shouldAllowAccessToBalanceWithToken() {
         webTestClient
                 .get()
-                .uri("/balance")
+                .uri("/api/v1/balance")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -67,14 +68,15 @@ class OAuth2ResourceServerTest {
     }
 
     /**
-     * Проверка доступа к /payment с моком авторизации
+     * Проверка доступа к /api/v1/payment с моком авторизации
      */
     @Test
     @WithMockUser
     void shouldAllowAccessToPaymentWithToken() {
         webTestClient
                 .post()
-                .uri("/payment")
+                .uri("/api/v1/payment")
+                .header("Content-Type", "application/json")
                 .bodyValue("""
                         {
                             "amount": 1000,

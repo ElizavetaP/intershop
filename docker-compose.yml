@@ -7,6 +7,27 @@ services:
     ports:
       - "6379:6379"
 
+  # Keycloak - OAuth2 Authorization Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    ports:
+      - "9090:9090"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HTTP_PORT=9090
+    command: 
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak-config/intershop-realm.json:/opt/keycloak/data/import/intershop-realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9090 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
   # Сервис платежей
   payment-service:
     build:
@@ -16,8 +37,12 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - KEYCLOAK_URL=http://keycloak:9090
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
 
   # Основное веб-приложение
   intershop-main:
@@ -30,6 +55,12 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATA_REDIS_HOST=redis
       - PAYMENT_SERVICE_URL=http://payment-service:8081
+      - KEYCLOAK_URL=http://keycloak:9090
+      - KEYCLOAK_CLIENT_SECRET=intershop-secret
     depends_on:
-      - redis
-      - payment-service
+      redis:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      keycloak:
+        condition: service_healthy

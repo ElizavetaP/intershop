@@ -1,0 +1,42 @@
+{
+  "realm": "intershop",
+  "enabled": true,
+  "displayName": "Intershop Realm",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": true,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "clients": [
+    {
+      "clientId": "intershop-client",
+      "name": "Intershop Application",
+      "description": "OAuth2 Client for Intershop → Payment Service communication",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "intershop-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "300"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [],
+    "client": {}
+  }
+}
+

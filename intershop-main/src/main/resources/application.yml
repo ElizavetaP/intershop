@@ -66,15 +66,12 @@ spring:
         provider:
           keycloak:
             token-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop/protocol/openid-connect/token
-            jwk-set-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop/protocol/openid-connect/certs
-            issuer-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop
         registration:
           payment-service:
             provider: keycloak
             client-id: intershop-client
-            client-secret: ${KEYCLOAK_CLIENT_SECRET:6kJOQhwx87LELcfdx1rPngMXT6S6bYwL}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:intershop-secret}
             authorization-grant-type: client_credentials
-            scope: payment:read,payment:write
 
 # Настройки платежного сервиса
 payment:

@@ -1,3 +1,10 @@
+-- Вставка тестовых пользователей
+-- Пароли: admin = "admin", user = "user" (BCrypt хеши)
+INSERT INTO users (username, password, email, role, enabled)
+VALUES
+    ('admin', '$2a$10$tDKcw0euHFiF.098uiXreez7tlDeJJAjE7ThU9XKu8DMt7uTJ5zV2', 'admin@intershop.com', 'ADMIN', true),
+    ('user', '$2a$10$qpnSOWHT5j8POV1VGMvqaeB3LYtEzx/xQ.nT/43xZCkf6ZweqI7hG', 'user@intershop.com', 'USER', true);
+
 -- Вставка данных в таблицу item (товары)
 INSERT INTO item (title, description, price, img_path)
 VALUES
@@ -9,12 +16,12 @@ VALUES
     ('Футболка', 'Футболка зеленая', 2000, 't-shirt.png'),
     ('Майка', 'Майка черная', 1600, 'undershirt.png');
 
--- Вставка данных в таблицу order (заказы)
-INSERT INTO orders (created_at)
+-- Вставка данных в таблицу orders (заказы)
+INSERT INTO orders (username, created_at)
 VALUES
-    ('2023-08-10 10:00:00'),  -- Заказ 1
-    ('2023-08-10 14:30:00'),  -- Заказ 2
-    ('2023-08-11 09:00:00');  -- Заказ 3
+    ('user', '2023-08-10 10:00:00'),   -- Заказ 1 (пользователь user)
+    ('user', '2023-08-10 14:30:00'),   -- Заказ 2 (пользователь user)
+    ('admin', '2023-08-11 09:00:00');  -- Заказ 3 (пользователь admin)
 
 -- Вставка данных в таблицу cart_item (товары в корзине)
 -- Для заказа 1

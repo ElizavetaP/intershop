@@ -23,25 +23,25 @@ public class CartService {
     @Autowired
     CachedItemService cachedItemService;
 
-    public Flux<CartItem> getAllNewCartItem() {
-        return cartItemRepository.getAllNewCartItem()
+    public Flux<CartItem> getAllNewCartItem(String username) {
+        return cartItemRepository.getAllNewCartItem(username)
                 .flatMap(this::loadCartItemWithItem);
     }
 
-    public Mono<CartItem> getNewCartItemByItemId(Long itemId) {
-        return cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId)
+    public Mono<CartItem> getNewCartItemByItemId(Long itemId, String username) {
+        return cartItemRepository.getCartItemByItemIdAndOrderIsNull(itemId, username)
                 .flatMap(this::loadCartItemWithItem);
     }
 
     @Transactional
-    public Mono<Void> performCartAction(Long cartItemId, String action, int currentCount) {
+    public Mono<Void> performCartAction(Long cartItemId, String action, int currentCount, String username) {
         return switch (action) {
-            case ACTION_INCREASE -> cartItemRepository.incrementCountById(cartItemId).then();
+            case ACTION_INCREASE -> cartItemRepository.incrementCountById(cartItemId, username).then();
             case ACTION_DECREASE -> {
                 if (currentCount <= 1) {
                     yield cartItemRepository.deleteById(cartItemId);
                 } else {
-                    yield cartItemRepository.decrementCountById(cartItemId).then();
+                    yield cartItemRepository.decrementCountById(cartItemId, username).then();
                 }
             }
             case ACTION_DELETE -> cartItemRepository.deleteById(cartItemId);
@@ -50,22 +50,23 @@ public class CartService {
     }
 
     @Transactional
-    public Mono<Void> changeCountOfItemByItemId(Long itemId, String action, int currentCount) {
-        return getNewCartItemByItemId(itemId)
+    public Mono<Void> changeCountOfItemByItemId(Long itemId, String action, int currentCount, String username) {
+        return getNewCartItemByItemId(itemId, username)
                 .switchIfEmpty(
                         //прежде чем увеличить count, создаем cartItem, если он отсутствует в корзине.
                         action.equals(ACTION_INCREASE) ?
-                                createCartItem(itemId) :
+                                createCartItem(itemId, username) :
                                 Mono.empty()
                 )
-                .flatMap(cartItem -> performCartAction(cartItem.getId(), action, currentCount));
+                .flatMap(cartItem -> performCartAction(cartItem.getId(), action, currentCount, username));
     }
 
-    public Mono<CartItem> createCartItem(Long itemId) {
+    public Mono<CartItem> createCartItem(Long itemId, String username) {
         return cachedItemService.getItemById(itemId)
                 .flatMap(item -> {
                     CartItem cartItem = new CartItem();
                     cartItem.setItemId(itemId);
+                    cartItem.setUsername(username);
                     cartItem.setItem(item); // @Transient поле
                     cartItem.setCount(0);
                     return cartItemRepository.save(cartItem);

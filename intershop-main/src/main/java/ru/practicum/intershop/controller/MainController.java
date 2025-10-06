@@ -19,6 +19,7 @@ import ru.practicum.intershop.model.Paging;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.ItemDtoService;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,9 +45,17 @@ public class MainController {
             @RequestParam(defaultValue = "NO") String sort,  // сортировка перечисление NO, ALPHA, PRICE
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page number must be greater than 0") int pageNumber,
+            Principal principal,
             Model model) {
 
-        return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize)
+        // Добавляем информацию об авторизации в модель
+        boolean isAuthenticated = principal != null;
+        String username = isAuthenticated ? principal.getName() : null;
+        
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("username", username);
+
+        return itemDtoService.getItemsWithCart(search, sort, pageNumber, pageSize, username)
                 .map(itemsPage -> {
                     // Разбиение на строки по 3 товара (только контент страницы)
                     List<List<ItemDto>> itemsInRows = chunkItems(itemsPage.getContent(), 3);
@@ -77,8 +86,9 @@ public class MainController {
     @PostMapping("/main/items/{id}")
     public Mono<String> changeCountOfItem(
             @PathVariable("id") Long id,
-            @Valid @ModelAttribute ItemActionDto itemActionDto) {
-        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount())
+            @Valid @ModelAttribute ItemActionDto itemActionDto,
+            Principal principal) {
+        return cartService.changeCountOfItemByItemId(id, itemActionDto.getAction(), itemActionDto.getCount(), principal.getName())
                 .then(Mono.just("redirect:/main/items"));
     }
 

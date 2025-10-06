@@ -15,6 +15,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+    // Spring Security для OAuth2 клиента и веб-авторизации
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.15'
 
@@ -24,6 +29,7 @@ dependencies {
     // Testcontainers для интеграционных тестов
     testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
     testImplementation 'org.testcontainers:testcontainers:1.19.1'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 // Генерация клиента для платежного сервиса

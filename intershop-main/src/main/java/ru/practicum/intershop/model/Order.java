@@ -17,6 +17,9 @@ public class Order {
     @Id
     private Long id;
 
+    @Column("username")
+    private String username;
+
     @Column("created_at")
     private LocalDateTime createdAt;
 

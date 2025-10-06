@@ -12,6 +12,14 @@ spring:
       enabled: true
       force: true
 
+  # OAuth2 Resource Server конфигурация
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:9090}/realms/intershop/protocol/openid-connect/certs
+
 payment:
   account:
     initial-balance: 15000  # баланс пользователя

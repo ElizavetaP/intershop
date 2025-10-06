@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import ru.practicum.intershop.dto.ItemActionDto;
 import ru.practicum.intershop.service.CartService;
 import ru.practicum.intershop.service.PaymentClientService;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/cart")
@@ -21,8 +22,10 @@ public class CartController {
     PaymentClientService paymentClientService;
 
     @GetMapping("/items")
-    public Mono<String> getCartItems(Model model) {
-        return cartService.getAllNewCartItem()
+    public Mono<String> getCartItems(Model model, Principal principal) {
+        model.addAttribute("currentUser", principal.getName());
+        
+        return cartService.getAllNewCartItem(principal.getName())
                 .collectList()
                 .flatMap(cartItems -> {
                     long totalPrice = cartService.getTotalPriceInCart(cartItems);
@@ -50,8 +53,9 @@ public class CartController {
 
     @PostMapping("/items/{id}")
     public Mono<String> changeCountOfItem(@PathVariable("id") Long id,
-                                          @Valid @ModelAttribute ItemActionDto itemActionDto) {
-        return cartService.performCartAction(id, itemActionDto.getAction(), itemActionDto.getCount())
+                                          @Valid @ModelAttribute ItemActionDto itemActionDto,
+                                          Principal principal) {
+        return cartService.performCartAction(id, itemActionDto.getAction(), itemActionDto.getCount(), principal.getName())
                 .then(Mono.just("redirect:/cart/items"));
     }
 }

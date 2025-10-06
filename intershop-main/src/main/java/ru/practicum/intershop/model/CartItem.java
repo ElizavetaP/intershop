@@ -21,6 +21,9 @@ public class CartItem {
     @Column("item_id")
     private Long itemId;
 
+    @Column("username")
+    private String username;
+
     @Column("quantity")
     private int count;
 

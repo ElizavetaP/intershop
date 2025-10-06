@@ -1,5 +1,8 @@
 # intershop
 
+**v4.0** — добавлена авторизация покупателя в приложении «Витрина интернет-магазина»;
+добавлена авторизация взаимодействия между приложением «Витрина интернет-магазина» и RESTful-сервисом платежей.
+
 **v3.0** — проект переведён на микросервисную архитектуру с использованием OpenAPI и Redis кеширования.
 
 **v2.0** — проект переведён на реактивный стек технологий (Spring WebFlux, R2DBC).
@@ -20,6 +23,13 @@
 - **Gradle** - система сборки
 - **Docker & Docker Compose** - контейнеризация
 - **Netty** - встроенный реактивный веб-сервер
+
+### Security & Authentication
+- **Spring Security** - фреймворк безопасности
+- **HTTP Basic Authentication** - авторизация пользователей в веб-интерфейсе
+- **OAuth2 Resource Server** - защита RESTful API с помощью JWT
+- **Keycloak** - Authorization Server (OAuth2/OpenID Connect)
+- **BCrypt** - хеширование паролей
 
 Приложение можно собрать из исходников и запустить локально или через Docker Compose.
 
@@ -151,5 +161,19 @@ docker-compose up --build
 
 ```
 
-Приложение будет доступно по адресу: http://localhost:8080
+Приложение будет доступно по адресу: http://localhost:8080/
+
+Keycloak автоматически настраивается  при каждом запуске.
+Все настройки хранятся в `intershop-realm.json`
+
+**Realm:** `intershop`
+**Client ID:** `intershop-client`
+**Client Secret:** `intershop-secret`
+
+## Доступ к Keycloak
+
+- URL: http://localhost:9090
+- Username: `admin`
+- Password: `admin`
+
 
